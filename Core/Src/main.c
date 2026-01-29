@@ -89,7 +89,7 @@ uint16_t testPwmVal = 0;
 
 
 
-static L6398_Unipolar_t g_xDriverUniPolar;
+static DrvPwm_Unipolar_t g_xDriverUniPolar;
 static _6StepCtlCtx_t g_xCtlUniPolar;
 
 extern void AdcSampling();

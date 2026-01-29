@@ -9,7 +9,7 @@ IGpio_t g_xGpo_phaseU_lowside;
 IGpio_t g_xGpo_phaseV_lowside;
 IGpio_t g_xGpo_phaseW_lowside;
 
-void InitL6398_Unipolar(L6398_Unipolar_t* pxDrive, fpPeriodCb fpCb, void* _args){
+void InitL6398_Unipolar(DrvPwm_Unipolar_t* pxDrive, fpPeriodCb fpCb, void* _args){
 
     PlatformConfig_6stepUniPolar(&g_xPwm_phaseU_highside, &g_xPwm_phaseV_highside, &g_xPwm_phaseW_highside,
 		&g_xGpo_phaseU_lowside, &g_xGpo_phaseV_lowside, &g_xGpo_phaseW_lowside);
@@ -42,15 +42,15 @@ void InitL6398_Unipolar(L6398_Unipolar_t* pxDrive, fpPeriodCb fpCb, void* _args)
 
 
 
-void Apply_L6398_CommutationUnipolar(void* pvDriver, uint8_t state, float pwmVal)
+void Apply_L6398_CommutationUnipolar(DrvPwm_Unipolar_t* pvDriver, uint8_t state, float pwmVal)
 {
 
-	L6398_Unipolar_t* pxDriver = (L6398_Unipolar_t*)pvDriver;
+	DrvPwm_Unipolar_t* pxDriver = pvDriver;
 
 	switch (state)
 	{
 		case 4:  // Hall: 001 -> B-PWM, C-Low
-			//DrvL6398_6Step_UniPolar_GateCtl(L6398_Unipolar_t* pxDrv, u8 phase, u8 ctl, float duty)
+			//DrvL6398_6Step_UniPolar_GateCtl(DrvPwm_Unipolar_t* pxDrv, u8 phase, u8 ctl, float duty)
 			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_U, _6STEP_PWM_IN, (float)pwmVal);
 			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_V, _6STEP_HiZ, (float)0);
 			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_W, _6STEP_LOWSIDE_ON, (float)0);
@@ -104,7 +104,7 @@ void Apply_L6398_CommutationUnipolar(void* pvDriver, uint8_t state, float pwmVal
 
 
 
-void DrvL6398_6Step_UniPolar_GateCtl(L6398_Unipolar_t* pxDrv, u8 phase, u8 ctl, float duty){
+void DrvL6398_6Step_UniPolar_GateCtl(DrvPwm_Unipolar_t* pxDrv, u8 phase, u8 ctl, float duty){
 
 
     switch (phase)

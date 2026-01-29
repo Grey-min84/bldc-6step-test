@@ -48,7 +48,7 @@ void TmCheckCounter(void* args);
 
 void AdcSampling(void* args);
 
-void Init_6Step_Unipolar(_6StepCtlCtx_t* ctx, void* pvDriver){
+void Init_6Step_Unipolar(_6StepCtlCtx_t* ctx, DrvPwm_Unipolar_t* pvDriver){
 
 	static TimerTask_t xTmTask1;
 	static TimerTask_t xTmTask2;
@@ -56,7 +56,7 @@ void Init_6Step_Unipolar(_6StepCtlCtx_t* ctx, void* pvDriver){
 
 	ctx->fpCommTb_unipolar = Apply_L6398_CommutationUnipolar;
 	ctx->fSetDuty = 0;
-	ctx->pvDriver = pvDriver;
+	ctx->pxDrvUnipolar = pvDriver;
 
 	PlatformConfig_HallSens_ISR(&ctx->xGpe_HallU, &ctx->xGpe_HallV, &ctx->xGpe_HallW, 
 		OnEdge_Commutation_withHallSens, (void*)ctx);
@@ -202,7 +202,7 @@ void TmCheckHallState(void* args){
 	}
 
 	ctx->ucCurrSts = state;
-	ctx->fpCommTb_unipolar(ctx->pvDriver, state,  ctx->fSetDuty );
+	ctx->fpCommTb_unipolar(ctx->pxDrvUnipolar, state,  ctx->fSetDuty );
 
 	
 	
@@ -241,7 +241,7 @@ void OnEdge_Commutation_withHallSens(void* args)
 	px6Step->ucCurrSts = state;
 	px6Step->ucIsIgnited = 1;
 
-	px6Step->fpCommTb_unipolar(px6Step->pvDriver, state,  px6Step->fSetDuty );
+	px6Step->fpCommTb_unipolar(px6Step->pxDrvUnipolar, state,  px6Step->fSetDuty );
 
 	MeasHallPeriod(read_u, read_v, read_w);
 		

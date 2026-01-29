@@ -43,8 +43,10 @@ typedef void (*ApplyBiPolarCb)(void* pvDriver, uint8_t state, float pwmVal);
 
 typedef struct _6StepCtlCtx_tag{
 	ApplyBiPolarCb fpCommTb_bipolar;
+	DrvPwm_Bipolar_t* pxDrvBipolar;
+
 	ApplyUniPolarCb fpCommTb_unipolar;
-	void* pvDriver;
+	DrvPwm_Unipolar_t* pxDrvUnipolar;
 	
 	float fSetDuty;
 
@@ -68,7 +70,7 @@ void OnEdge_Commutation_withHallSens(void* args);
 
 
 
-void Init_6Step_Unipolar(_6StepCtlCtx_t* ctx, void* pvDriver);
+void Init_6Step_Unipolar(_6StepCtlCtx_t* ctx, DrvPwm_Unipolar_t* pvDriver);
 void Apply_L6398_CommutationUnipolar(void* pxDriver, uint8_t state, float pwmVal);
 
 //void HallEdgeDetected(void* args);
