@@ -1,0 +1,15 @@
+Debug/
+Release/
+*.bak
+
+Debug/Core/Src/main.cyclo
+Debug/Core/Src/main.d
+Debug/Core/Src/main.o
+Debug/Core/Src/main.su
+Debug/Core/Src/subdir.mk
+Debug/Core/Src/syscalls.o
+Debug/Core/Src/sysmem.o
+Debug/Core/Startup/subdir.mk
+Debug/makefile
+Debug/objects.list
+Debug/sources.mk
