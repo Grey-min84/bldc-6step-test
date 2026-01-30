@@ -65,6 +65,7 @@ void Error_Handler(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define TIM1_MAX_DUTY 4249
+#define TIM7_PERIOD_CNT 65535
 #define B1_Pin GPIO_PIN_13
 #define B1_GPIO_Port GPIOC
 #define B1_EXTI_IRQn EXTI15_10_IRQn
