@@ -99,3 +99,35 @@ int32_t MedianFilter(MedianFilter_t *l_pstVar, int32_t l_iNewValue)
 	return l_iRet;
 }
 
+void InitMovAvgFilter(MovAvgFilter_t* pstVar, uint8_t bufCount){
+
+	memset(&pstVar->m_buf[0], 0, sizeof(pstVar));
+
+	if(bufCount > MAX_MOV_AVG_FILTER_COUNT){
+		bufCount = MAX_MOV_AVG_FILTER_COUNT;
+	}
+
+	pstVar->m_buf_count = bufCount;
+	pstVar->m_buf_idx = 0;
+	pstVar->m_sum = 0;
+}
+
+
+int32_t MoveAvgFilter(MovAvgFilter_t* pstVar, int32_t newValue){
+
+	pstVar->m_sum -= pstVar->m_buf[pstVar->m_buf_idx];
+
+	pstVar->m_buf[pstVar->m_buf_idx] = newValue;
+
+	pstVar->m_sum += newValue;
+
+	pstVar->m_buf_idx++;
+	
+	if(pstVar->m_buf_idx >= pstVar->m_buf_count)
+	{
+		pstVar->m_buf_idx = 0;
+	}
+
+	return (int32_t)(pstVar->m_sum / pstVar->m_buf_count);
+
+}

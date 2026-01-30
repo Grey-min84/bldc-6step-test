@@ -3,7 +3,8 @@
 #include "measSpd.h"
 #include "six_step.h"
 
-
+#define PERIOD_CNT (TIM7_PERIOD_CNT+1)
+#define COUNTER_SRC  (TIM7->CNT)
 
 const float alpha = 0.15f;
 
@@ -45,12 +46,20 @@ void MeasHallPeriod(HallPeriodHnd_t* pxHallPeriod, uint8_t u, uint8_t v, uint8_t
 
     if (hall_state != pxHallPeriod->hall_state_prev)
     {
-        uint32_t now = TIM7->CNT;
 
-        if (now >= pxHallPeriod->last_cnt)
+        // counting 타이머의 클럭은 1MHz이므로 카운트 하나는 1us
+        uint32_t now = COUNTER_SRC;
+
+        if (now >= pxHallPeriod->last_cnt){
+            
             pxHallPeriod->hall_dt_us = now - pxHallPeriod->last_cnt;
-        else
-            pxHallPeriod->hall_dt_us = (65536 - pxHallPeriod->last_cnt) + now;
+        }
+        else {
+            // overflow 처리
+            // 카운팅 타이머의 주기는 PERIOD_CNT(=65536)
+            pxHallPeriod->hall_dt_us = (PERIOD_CNT - pxHallPeriod->last_cnt) + now;
+        }
+            
 
         pxHallPeriod->last_cnt = now;
         pxHallPeriod->hall_state_prev = hall_state;

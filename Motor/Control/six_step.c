@@ -39,7 +39,7 @@ void Init_6Step_Unipolar(_6StepCtlCtx_t* ctx, DrvPwm_Unipolar_t* pvDriver){
 	
 
 	ctx->fpCommTb_unipolar = Apply_L6398_CommutationUnipolar;
-	ctx->iSetDuty = 0;
+	
 	ctx->pxDrvUnipolar = pvDriver;
 
 	PlatformConfig_HallSens_ISR(&ctx->xGpe_HallU, &ctx->xGpe_HallV, &ctx->xGpe_HallW, 
@@ -47,6 +47,7 @@ void Init_6Step_Unipolar(_6StepCtlCtx_t* ctx, DrvPwm_Unipolar_t* pvDriver){
 
 
 	ctx->ucIsIgnited = 0;
+	ctx->iSetDuty = 0;
 	ctx->ucCtlMode = eCTL_MODE_DUTY;
 
 
@@ -59,6 +60,8 @@ void Init_6Step_Unipolar(_6StepCtlCtx_t* ctx, DrvPwm_Unipolar_t* pvDriver){
 	RegisterTimer(&g_xTmContainerMain, &g_xTmHallChecker);
 
 }
+
+
 
 
 void Init_6step_adcSampling(_6StepCtlCtx_t* ctx){
