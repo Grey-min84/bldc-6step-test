@@ -4,7 +4,6 @@
 
 #include "IF_Hal.h"
 #include "motor_term_def.h"
-#include "hall.h"
 #include "cli.h"
 #include "measSpd.h"
 #include "spd_ctrl.h"

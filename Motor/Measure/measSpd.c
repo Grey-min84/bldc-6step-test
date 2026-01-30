@@ -1,12 +1,13 @@
 #include <math.h>
 
 #include "measSpd.h"
-#include "hall.h"
 #include "six_step.h"
 
 
 
 const float alpha = 0.15f;
+
+static inline uint8_t hall_state_valid(uint8_t s);
 
 HallSpdMeas_t g_xHallSpdMeas = {
     .no_hall_cnt = 0,
@@ -21,9 +22,63 @@ HallSpdMeas_t g_xHallSpdMeas = {
 
 
 void SpdCalc_init(HallSpdMeas_t* pxSpdMeas){
+
     memset(pxSpdMeas, 0, sizeof(HallSpdMeas_t));
     pxSpdMeas->speed_state = SPEED_TIMEOUT;
 }
+
+
+
+
+
+
+
+void MeasHallPeriod(HallPeriodHnd_t* pxHallPeriod, uint8_t u, uint8_t v, uint8_t w){
+
+    volatile uint8_t hall_state = (u << 2) | (v << 1) | w;
+
+
+    if(hall_state_valid(hall_state) == 0){
+        // invalid state, ignore
+        return;
+    }
+
+    if (hall_state != pxHallPeriod->hall_state_prev)
+    {
+        uint32_t now = TIM7->CNT;
+
+        if (now >= pxHallPeriod->last_cnt)
+            pxHallPeriod->hall_dt_us = now - pxHallPeriod->last_cnt;
+        else
+            pxHallPeriod->hall_dt_us = (65536 - pxHallPeriod->last_cnt) + now;
+
+        pxHallPeriod->last_cnt = now;
+        pxHallPeriod->hall_state_prev = hall_state;
+    }
+
+     pxHallPeriod->last_hall_tick = HAL_GetTick();
+}
+
+
+
+
+
+
+float CalcHallSensor_RawRPM(uint32_t _dt_us){
+
+    //1e6f = 1 * 10^6   -> 1 Mhz Timer frequency
+
+    return 60.0f * 1e6f / (float)((float)_dt_us * 6.0f * (float)BCM_MOTOR_POLE_PAIRS);
+
+}
+
+
+
+
+
+
+
+
 
 
 void SpeedCalculation(void* args){
@@ -169,4 +224,43 @@ float speed_observer_step(HallSpdMeas_t* pxSpdMeas)
     return pxSpdMeas->rpm_est;
 }
 
+
+
+uint32_t dt_buf[HALL_DT_BUF];
+uint8_t dt_idx;
+uint64_t dt_sum;
+
+uint32_t MovAvg_HallSensor_dt_us(uint32_t dt){
+    dt_sum -= dt_buf[dt_idx];
+    dt_buf[dt_idx] = dt;
+    dt_sum += dt;
+
+    dt_idx = (dt_idx + 1) % HALL_DT_BUF;
+
+    return (uint32_t)(dt_sum / HALL_DT_BUF);
+}
+
+
+void MovAvg_HallSensor_Init(){
+    memset(dt_buf, 0, HALL_DT_BUF*sizeof(uint32_t));
+    dt_idx = 0;
+    dt_sum = 0;
+}
+
+
+static inline uint8_t hall_state_valid(uint8_t s)
+{
+    switch (s)
+    {
+        case 0b001:
+        case 0b011:
+        case 0b010:
+        case 0b110:
+        case 0b100:
+        case 0b101:
+            return 1;
+        default:
+            return 0;
+    }
+}
 
