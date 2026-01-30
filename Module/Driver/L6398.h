@@ -9,10 +9,10 @@
 
 void InitL6398_Unipolar(DrvPwm_Unipolar_t* pxDrive, fpPeriodCb fpCb, void* _args);
 
-void Apply_L6398_CommutationUnipolar(DrvPwm_Unipolar_t* args, uint8_t state, float pwmVal);
+void Apply_L6398_CommutationUnipolar(DrvPwm_Unipolar_t* args, uint8_t state, u32 pwmVal);
 
-void DrvL6398_6Step_UniPolar_GateCtl(DrvPwm_Unipolar_t* pxDrv, u8 phase, u8 ctl, float duty);
-void DrvL6398_6Step_BiPolar_GateCtl(DrvPwm_Bipolar_t* pxDrv, u8 phase, u8 ctl, float duty);
+void DrvL6398_6Step_UniPolar_GateCtl(DrvPwm_Unipolar_t* pxDrv, u8 phase, u8 ctl, u32 duty);
+void DrvL6398_6Step_BiPolar_GateCtl(DrvPwm_Bipolar_t* pxDrv, u8 phase, u8 ctl, u32 duty);
 
 
 #endif

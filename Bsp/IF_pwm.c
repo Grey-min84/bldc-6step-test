@@ -27,7 +27,8 @@ void Pwm1_AddCallbackPeriodDone(IPwm_t* pxPwm, fpPeriodCb fpCb, void* _args){
 }   
 
 
-void Pwm1_Generate(IPwm_t* pxPwm, float fDuty){
+
+void Pwm1_Generate_percent(IPwm_t* pxPwm, float fDuty){
 
     Pwm1Ch_HwWrapper* pxHw = pxPwm->pxPwmSrc;
     float inDuty = (float)((float)pxHw->uiMaxDuty * (fDuty / 100.0f));
@@ -35,7 +36,10 @@ void Pwm1_Generate(IPwm_t* pxPwm, float fDuty){
     portSTM32_PWM_Generate(pxPwm->pxPwmSrc, (u32)inDuty);
 }
 
-
+void Pwm1_generate(IPwm_t* pxPwm, uint32_t iDuty){
+    //Pwm1Ch_HwWrapper* pxHw = pxPwm->pxPwmSrc;
+    portSTM32_PWM_Generate(pxPwm->pxPwmSrc, iDuty);
+}
 
 
 void Pwm1_HwPeriodElapsedCallback(IPwm_t* pxHw){

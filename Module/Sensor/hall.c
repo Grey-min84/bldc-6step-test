@@ -1,36 +1,47 @@
+#include <string.h>
+
 #include "hall.h"
 
-volatile uint8_t hall_state;
-volatile uint8_t hall_state_prev;
-volatile uint32_t last_hall_tick = 0;
-volatile uint32_t hall_counter = 0;
-volatile uint32_t hall_dt_us;
-volatile uint32_t last_cnt;
 
-void MeasHallPeriod(uint8_t u, uint8_t v, uint8_t w){
+// volatile uint8_t hall_state_prev;
+// volatile uint32_t last_hall_tick = 0;
+// volatile uint32_t hall_dt_us;
+// volatile uint32_t last_cnt;
 
-    hall_state = (u << 2) | (v << 1) | w;
 
-    hall_counter++;
+// HallPeriodHnd_t g_xHallPeriodHnd = {
+//     .hall_state_prev = 0,
+//     .last_hall_tick = 0,
+//     .hall_dt_us = 0,
+//     .last_cnt = 0
+// };
+static inline uint8_t hall_state_valid(uint8_t s);
+
+
+void MeasHallPeriod(HallPeriodHnd_t* pxHallPeriod, uint8_t u, uint8_t v, uint8_t w){
+
+    volatile uint8_t hall_state = (u << 2) | (v << 1) | w;
+
 
     if(hall_state_valid(hall_state) == 0){
         // invalid state, ignore
         return;
     }
 
-    if (hall_state != hall_state_prev)
+    if (hall_state != pxHallPeriod->hall_state_prev)
     {
         uint32_t now = TIM7->CNT;
-        if (now >= last_cnt)
-            hall_dt_us = now - last_cnt;
-        else
-            hall_dt_us = (65536 - last_cnt) + now;
 
-        last_cnt = now;
-        hall_state_prev = hall_state;
+        if (now >= pxHallPeriod->last_cnt)
+            pxHallPeriod->hall_dt_us = now - pxHallPeriod->last_cnt;
+        else
+            pxHallPeriod->hall_dt_us = (65536 - pxHallPeriod->last_cnt) + now;
+
+        pxHallPeriod->last_cnt = now;
+        pxHallPeriod->hall_state_prev = hall_state;
     }
 
-     last_hall_tick = HAL_GetTick();
+     pxHallPeriod->last_hall_tick = HAL_GetTick();
 }
 
 
@@ -74,3 +85,19 @@ void MovAvg_HallSensor_Init(){
 
 
 
+
+static inline uint8_t hall_state_valid(uint8_t s)
+{
+    switch (s)
+    {
+        case 0b001:
+        case 0b011:
+        case 0b010:
+        case 0b110:
+        case 0b100:
+        case 0b101:
+            return 1;
+        default:
+            return 0;
+    }
+}

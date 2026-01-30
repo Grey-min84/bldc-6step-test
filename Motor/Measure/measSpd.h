@@ -15,9 +15,26 @@ typedef enum {
 
 
 
+typedef struct {
+    uint32_t no_hall_cnt;
+    speed_state_t speed_state;
+    uint32_t avg_dt_us;
+
+    float rpm_est;
+    float rpm_raw;
+    float g_fRpm_filt;
+    float g_fRpm_obs;
+}HallSpdMeas_t;
+
+
+
+
+void SpeedCalculation(void* args);
+void SpdCalc_init(HallSpdMeas_t* pxSpdMeas);
+
 
 //float CalcHallSensor_RawRPM(uint32_t _dt_us);
-float speed_observer_step(speed_state_t state, uint32_t hall_dt_avg);
+float speed_observer_step(HallSpdMeas_t* pxSpdMeas);
 
 
 #if 0
@@ -198,7 +215,7 @@ void SpeedTask(void *arg)
         }
         
 
-        g_xBrkMotorRpmCtl.m_fCurrRpm = g_fRpm_obs;
+        g_xBrkMotorRpmCtl.m_iCurrRpm = g_fRpm_obs;
 
         vTaskDelay(pdMS_TO_TICKS(1)); // 2ms
     }

@@ -42,60 +42,58 @@ void InitL6398_Unipolar(DrvPwm_Unipolar_t* pxDrive, fpPeriodCb fpCb, void* _args
 
 
 
-void Apply_L6398_CommutationUnipolar(DrvPwm_Unipolar_t* pvDriver, uint8_t state, float pwmVal)
-{
+void Apply_L6398_CommutationUnipolar(DrvPwm_Unipolar_t* pvDriver, uint8_t state, u32 pwmVal) {
 
-	DrvPwm_Unipolar_t* pxDriver = pvDriver;
 
 	switch (state)
 	{
 		case 4:  // Hall: 001 -> B-PWM, C-Low
 			//DrvL6398_6Step_UniPolar_GateCtl(DrvPwm_Unipolar_t* pxDrv, u8 phase, u8 ctl, float duty)
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_U, _6STEP_PWM_IN, (float)pwmVal);
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_V, _6STEP_HiZ, (float)0);
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_W, _6STEP_LOWSIDE_ON, (float)0);
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_U, _6STEP_PWM_IN, pwmVal);
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_V, _6STEP_HiZ, 0);
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_W, _6STEP_LOWSIDE_ON, 0);
 			break;
 
 		case 2:  // Hall: 010 -> A-PWM, C-Low  -----
-            DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_U, _6STEP_LOWSIDE_ON, 0);  // A: Low
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_V, _6STEP_PWM_IN, pwmVal); // B: PWM
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_W, _6STEP_HiZ, 0);  		// C: Off
+            DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_U, _6STEP_LOWSIDE_ON, 0);  // A: Low
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_V, _6STEP_PWM_IN, pwmVal); // B: PWM
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_W, _6STEP_HiZ, 0);  		// C: Off
 			break;
 
 		case 6:  // Hall: 011 -> A-PWM, B-Low
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_U, _6STEP_HiZ, 0);  		// A: Off
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_V, _6STEP_PWM_IN, pwmVal); // B: PWM
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_W, _6STEP_LOWSIDE_ON, 0);  // C: Low
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_U, _6STEP_HiZ, 0);  		// A: Off
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_V, _6STEP_PWM_IN, pwmVal); // B: PWM
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_W, _6STEP_LOWSIDE_ON, 0);  // C: Low
 			break;
 
 		case 1:  // Hall: 100 -> C-PWM, A-Low
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_U, _6STEP_HiZ, 0);  		// A: Off
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_V, _6STEP_LOWSIDE_ON, 0);  // B: Low
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_W, _6STEP_PWM_IN, pwmVal); // C: PWM
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_U, _6STEP_HiZ, 0);  		// A: Off
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_V, _6STEP_LOWSIDE_ON, 0);  // B: Low
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_W, _6STEP_PWM_IN, pwmVal); // C: PWM
 			break;
 
 		case 5:  // Hall: 101 -> C-PWM, B-Low
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_U, _6STEP_PWM_IN, pwmVal); // A: PWM
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_V, _6STEP_LOWSIDE_ON, 0);  // B: Low
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_W, _6STEP_HiZ, 0);  		// C: Off
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_U, _6STEP_PWM_IN, pwmVal); // A: PWM
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_V, _6STEP_LOWSIDE_ON, 0);  // B: Low
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_W, _6STEP_HiZ, 0);  		// C: Off
 			break;
 
 		case 3:  // Hall: 110 -> B-PWM, A-Low
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_U, _6STEP_LOWSIDE_ON, 0);  // A: Low
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_V, _6STEP_HiZ, 0);  		// B: Off
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_W, _6STEP_PWM_IN, pwmVal); // C: PWM
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_U, _6STEP_LOWSIDE_ON, 0);  // A: Low
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_V, _6STEP_HiZ, 0);  		// B: Off
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_W, _6STEP_PWM_IN, pwmVal); // C: PWM
 			break;
 
         case 7:  // align
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver,POLE_U, _6STEP_PWM_IN, pwmVal);  
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver,POLE_V, _6STEP_LOWSIDE_ON, 0);  	
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver,POLE_W, _6STEP_LOWSIDE_ON, 0);  	
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver,POLE_U, _6STEP_PWM_IN, pwmVal);  
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver,POLE_V, _6STEP_LOWSIDE_ON, 0);  	
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver,POLE_W, _6STEP_LOWSIDE_ON, 0);  	
 			break;
 
 		default:  // Invalid states (0, 7)
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_U, _6STEP_HiZ, 0);  // A: Off
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_V, _6STEP_HiZ, 0);  // B: Off
-			DrvL6398_6Step_UniPolar_GateCtl(pxDriver, POLE_W, _6STEP_HiZ, 0);  // C: Off
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_U, _6STEP_HiZ, 0);  // A: Off
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_V, _6STEP_HiZ, 0);  // B: Off
+			DrvL6398_6Step_UniPolar_GateCtl(pvDriver, POLE_W, _6STEP_HiZ, 0);  // C: Off
 			break;
 	}
 }
@@ -104,7 +102,7 @@ void Apply_L6398_CommutationUnipolar(DrvPwm_Unipolar_t* pvDriver, uint8_t state,
 
 
 
-void DrvL6398_6Step_UniPolar_GateCtl(DrvPwm_Unipolar_t* pxDrv, u8 phase, u8 ctl, float duty){
+void DrvL6398_6Step_UniPolar_GateCtl(DrvPwm_Unipolar_t* pxDrv, u8 phase, u8 ctl, uint32_t duty){
 
 
     switch (phase)
@@ -112,17 +110,17 @@ void DrvL6398_6Step_UniPolar_GateCtl(DrvPwm_Unipolar_t* pxDrv, u8 phase, u8 ctl,
         case POLE_U:  // Phase A
             switch(ctl){
                 case _6STEP_HiZ:
-                    Pwm1_Generate(pxDrv->pxPwmU_highSide, 0.0f);
+                    Pwm1_generate(pxDrv->pxPwmU_highSide, 0);
                     WriteGpio(pxDrv->pxPinU_lowSide, MONO_PIN_HIGH);
                     break;
 
                 case _6STEP_PWM_IN:
-                    Pwm1_Generate(pxDrv->pxPwmU_highSide, duty);
+                    Pwm1_generate(pxDrv->pxPwmU_highSide, duty);
                     WriteGpio(pxDrv->pxPinU_lowSide, MONO_PIN_HIGH);
                     break;
 
                 case _6STEP_LOWSIDE_ON:
-                    Pwm1_Generate(pxDrv->pxPwmU_highSide, 0.0f);
+                    Pwm1_generate(pxDrv->pxPwmU_highSide, 0);
                     WriteGpio(pxDrv->pxPinU_lowSide, MONO_PIN_LOW);
                     break;
             }
@@ -131,17 +129,17 @@ void DrvL6398_6Step_UniPolar_GateCtl(DrvPwm_Unipolar_t* pxDrv, u8 phase, u8 ctl,
         case POLE_V:  // Phase B
             switch(ctl){
                 case _6STEP_HiZ:
-                    Pwm1_Generate(pxDrv->pxPwmV_highSide, 0.0f);
+                    Pwm1_generate(pxDrv->pxPwmV_highSide, 0);
                     WriteGpio(pxDrv->pxPinV_lowSide, MONO_PIN_HIGH);
                     break;
 
                 case _6STEP_PWM_IN:
-                    Pwm1_Generate(pxDrv->pxPwmV_highSide, duty);
+                    Pwm1_generate(pxDrv->pxPwmV_highSide, duty);
                     WriteGpio(pxDrv->pxPinV_lowSide, MONO_PIN_HIGH);
                     break;
 
                 case _6STEP_LOWSIDE_ON:
-                    Pwm1_Generate(pxDrv->pxPwmV_highSide, 0.0f);
+                    Pwm1_generate(pxDrv->pxPwmV_highSide, 0);
                     WriteGpio(pxDrv->pxPinV_lowSide, MONO_PIN_LOW);
                     break;
             }
@@ -150,17 +148,17 @@ void DrvL6398_6Step_UniPolar_GateCtl(DrvPwm_Unipolar_t* pxDrv, u8 phase, u8 ctl,
         case POLE_W:  // Phase C
             switch(ctl){
                 case _6STEP_HiZ:
-                    Pwm1_Generate(pxDrv->pxPwmW_highSide, 0.0f);
+                    Pwm1_generate(pxDrv->pxPwmW_highSide, 0);
                     WriteGpio(pxDrv->pxPinW_lowSide, MONO_PIN_HIGH);
                     break;
 
                 case _6STEP_PWM_IN:
-                    Pwm1_Generate(pxDrv->pxPwmW_highSide, duty);
+                    Pwm1_generate(pxDrv->pxPwmW_highSide, duty);
                     WriteGpio(pxDrv->pxPinW_lowSide, MONO_PIN_HIGH);
                     break;
 
                 case _6STEP_LOWSIDE_ON:
-                    Pwm1_Generate(pxDrv->pxPwmW_highSide, 0.0f);
+                    Pwm1_generate(pxDrv->pxPwmW_highSide, 0);
                     WriteGpio(pxDrv->pxPinW_lowSide, MONO_PIN_LOW);
                     break;
             }

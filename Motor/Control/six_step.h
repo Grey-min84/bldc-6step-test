@@ -6,23 +6,20 @@
 #include "motor_term_def.h"
 #include "hall.h"
 #include "cli.h"
-
-enum eADC_CH_IDX{
-	eADC_CH_CURR_A = 0,
-	eADC_CH_CURR_B,
-	eADC_CH_CURR_C,
-	eADC_CH_VBUS,
-	eADC_CH_BEMF_A,
-	eADC_CH_BEMF_B,
-	eADC_CH_BEMF_C,
-	eADC_CH_MAX
-};
-
+#include "measSpd.h"
+#include "spd_ctrl.h"
 
 
 enum e6STEP_CTL{
 	e6STEP_CTL_UNIPOLAR = 0,
 	e6STEP_CTL_BIPOLAR,
+};
+
+enum eCTL_MODE{
+	eCTL_MODE_OPENLOOP = 0,
+	eCTL_MODE_DUTY,
+	eCTL_MODE_SPEED,
+	eCTL_MODE_TORQUE,
 };
 
 
@@ -38,8 +35,8 @@ enum SIX_STEP_POS_IDX{
 	eSECTION_MAX = 8
 };
 
-typedef void (*ApplyUniPolarCb)(void* pvDriver, uint8_t state, float pwmVal);
-typedef void (*ApplyBiPolarCb)(void* pvDriver, uint8_t state, float pwmVal);
+typedef void (*ApplyUniPolarCb)(DrvPwm_Unipolar_t* pvDriver, uint8_t state, u32 pwmVal);
+typedef void (*ApplyBiPolarCb)(DrvPwm_Bipolar_t* pvDriver, uint8_t state, u32 pwmVal);
 
 typedef struct _6StepCtlCtx_tag{
 	ApplyBiPolarCb fpCommTb_bipolar;
@@ -47,31 +44,42 @@ typedef struct _6StepCtlCtx_tag{
 
 	ApplyUniPolarCb fpCommTb_unipolar;
 	DrvPwm_Unipolar_t* pxDrvUnipolar;
-	
-	float fSetDuty;
 
-	uint32_t uiSetRpm;
-	uint8_t ucCurrSts;
+	u8 ucCtlMode;
+	
+	u32 iSetDuty;
+	u8 ucBrkOn;
+	u8 ucCurrHallSts;
+
+
 	uint8_t ucIsIgnited;
 
 	IGpio_t xGpe_HallU ;
 	IGpio_t xGpe_HallV ;
 	IGpio_t xGpe_HallW ;
 
+	HallSpdMeas_t xHallSpdMeas;
+
+	HallPeriodHnd_t xHallPeriodCalc;
+
+	MotorRpmCtrl_t* pxSpdCtl;
+
 }_6StepCtlCtx_t;
 
 
-//void BldcPwrOut_t PhaseFind(uint8_t step);
 
 
-
-void OnEdge_Commutation_withHallSens(void* args);
+void OnEdge_commutation(void* args);
 
 
 
 
 void Init_6Step_Unipolar(_6StepCtlCtx_t* ctx, DrvPwm_Unipolar_t* pvDriver);
-void Apply_L6398_CommutationUnipolar(void* pxDriver, uint8_t state, float pwmVal);
+void Init_6step_adcSampling(_6StepCtlCtx_t* ctx);
+void Init_6step_speedCtrl(_6StepCtlCtx_t* ctx);
+
+
+
 
 //void HallEdgeDetected(void* args);
 

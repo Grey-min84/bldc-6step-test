@@ -57,7 +57,10 @@ typedef struct IPwm_tag{
 
 void Pwm1_StartStop(IPwm_t* pxPwm, u8 OnOff);
 void Pwm1_InitHw(IPwm_t* pxPwm, Pwm1Ch_HwWrapper* pxHw, u8 ucBldcCh);
-void Pwm1_Generate(IPwm_t* pxCtx, float fDuty);
+void Pwm1_Generate_percent(IPwm_t* pxCtx, float fDuty);
+void Pwm1_generate(IPwm_t* pxPwm, uint32_t iDuty);
+
+
 void Pwm1_AddCallbackPeriodDone(IPwm_t* pxPwm, fpPeriodCb fpCb, void* _args);
 
 void Pwm2_StartStop(IPwm_t* pxPwm, u8 OnOff);

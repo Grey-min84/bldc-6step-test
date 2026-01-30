@@ -92,7 +92,7 @@ uint16_t testPwmVal = 0;
 static DrvPwm_Unipolar_t g_xDriverUniPolar;
 static _6StepCtlCtx_t g_xCtlUniPolar;
 
-extern void AdcSampling();
+
 
 
 
@@ -149,11 +149,16 @@ int main(void)
   cliInit((void*)0);
   cliOpen(0, &hlpuart1);
 
-  InitL6398_Unipolar(&g_xDriverUniPolar, AdcSampling, NULL);
-	Init_6Step_Unipolar(&g_xCtlUniPolar, (void*)&g_xDriverUniPolar);
+  InitL6398_Unipolar(&g_xDriverUniPolar, NULL, NULL);
+
+  Init_6Step_Unipolar(&g_xCtlUniPolar, (void*)&g_xDriverUniPolar);
+
+  Init_6step_adcSampling(&g_xCtlUniPolar);
+  Init_6step_speedCtrl(&g_xCtlUniPolar);
+
 	cliAdd("six_step", CliControl, (void*)&g_xCtlUniPolar,  1);
 
-  //
+
 
 
  
