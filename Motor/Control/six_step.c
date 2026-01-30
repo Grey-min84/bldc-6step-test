@@ -39,7 +39,6 @@ void Init_6Step_Unipolar(_6StepCtlCtx_t* ctx, DrvPwm_Unipolar_t* pvDriver){
 	
 
 	ctx->fpCommTb_unipolar = Apply_L6398_CommutationUnipolar;
-	
 	ctx->pxDrvUnipolar = pvDriver;
 
 	PlatformConfig_HallSens_ISR(&ctx->xGpe_HallU, &ctx->xGpe_HallV, &ctx->xGpe_HallW, 
