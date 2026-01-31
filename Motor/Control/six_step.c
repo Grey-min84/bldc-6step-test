@@ -4,10 +4,13 @@
 #include "boardNuclG431.h"
 #include "measSupport.h"
 #include "measCurr.h"
+#include "tiny_printf.h"
 
 // IGpio_t g_xGpe_HallU ;
 // IGpio_t g_xGpe_HallV ;
 // IGpio_t g_xGpe_HallW ;
+
+
 
 
 /* ********************************
@@ -29,6 +32,12 @@ TimerCounter_t g_xTmCounterMain;
 static TimerTask_t g_xTmSpdMeasure;
 static TimerTask_t g_xTmSpdControl;
 static TimerTask_t g_xTmHallChecker;
+static TimerTask_t g_xTmCounting;
+
+static MotorRpmCtrl_t g_xMotorRpmCtrl;
+
+
+static void TmCountingHelper(void* args);
 
 
 
@@ -47,6 +56,7 @@ void Init_6Step_Unipolar(_6StepCtlCtx_t* ctx, DrvPwm_Unipolar_t* pvDriver){
 
 	ctx->ucIsIgnited = 0;
 	ctx->iSetDuty = 0;
+	ctx->ucDir = 0;
 	ctx->ucCtlMode = eCTL_MODE_DUTY;
 
 
@@ -71,6 +81,9 @@ void Init_6step_adcSampling(_6StepCtlCtx_t* ctx){
 
 void Init_6step_speedCtrl(_6StepCtlCtx_t* ctx){
 
+
+	ctx->pxSpdCtl = &g_xMotorRpmCtrl;
+
 	SpeedControl_Init(ctx->pxSpdCtl);
 	SpdCalc_init(&ctx->xHallSpdMeas);
 
@@ -89,7 +102,20 @@ void Init_6step_speedCtrl(_6StepCtlCtx_t* ctx){
 	g_xTmSpdControl.uiPeriod = 1;
 	g_xTmSpdControl.ucTimerStatus = HARD_TIMER_STARTED;
 
+	// 초기에는 비활성화
+	ctx->pxSpdCtl->m_ucCtlState = eSPD_CTL_STATE_IDLE;
+
 	RegisterTimer(&g_xTmContainerMain, &g_xTmSpdControl);
+
+
+
+	// Main loop 안에서 타이밍에 맞게 실행해야 되는 기능들 tick 관리
+	g_xTmCounting.args = (void*)&g_xTickCount;
+	g_xTmCounting.fpTmTask = TmCountingHelper;
+	g_xTmCounting.uiPeriod = 1;
+	g_xTmCounting.ucTimerStatus = HARD_TIMER_STARTED;
+
+	RegisterTimer(&g_xTmContainerMain, &g_xTmCounting);
 }
 
 
@@ -105,15 +131,6 @@ void TmCheckHallState(void* args){
 	uint8_t read = 0;
 
 	_6StepCtlCtx_t* ctx = (_6StepCtlCtx_t*)args;
-
-	if(ctx->iSetDuty < 1.0f){
-		ctx->ucIsIgnited = 0;
-	}
-
-
-	if(ctx->ucIsIgnited != 0){
-		return;
-	}
 
 
 	read = ReadGpio(&ctx->xGpe_HallU);
@@ -135,8 +152,26 @@ void TmCheckHallState(void* args){
 		state |= 0x04;
 	}
 
+
 	ctx->ucCurrHallSts = state;
-	ctx->fpCommTb_unipolar(ctx->pxDrvUnipolar, state,  ctx->iSetDuty );
+
+
+
+	if(ctx->ucCtlMode == eCTL_MODE_SPEED){
+		return;
+	}
+
+
+	if(ctx->iSetDuty < 100){
+		ctx->ucIsIgnited = 0;
+	}
+
+
+	if(ctx->ucIsIgnited != 0){
+		return;
+	}
+	
+	ctx->fpCommTb_unipolar(ctx->pxDrvUnipolar, state,  ctx->iSetDuty, ctx->ucDir );
 }
 
 
@@ -172,7 +207,7 @@ void OnEdge_commutation(void* args)
 	px6Step->ucCurrHallSts = state;
 	px6Step->ucIsIgnited = 1;
 
-	px6Step->fpCommTb_unipolar(px6Step->pxDrvUnipolar, state,  px6Step->iSetDuty );
+	px6Step->fpCommTb_unipolar(px6Step->pxDrvUnipolar, state,  px6Step->iSetDuty, px6Step->ucDir );
 
 	MeasHallPeriod(&px6Step->xHallPeriodCalc,  read_u, read_v, read_w);
 }
@@ -182,7 +217,7 @@ void OnEdge_commutation(void* args)
 
 
 
-
+uint8_t g_ucIsLogOn = 0;
 
 
 
@@ -196,23 +231,61 @@ void CliControl(cli_args_t *args, void* param){
 
 		if(args->isStr(0, "rpm") == 1){
 			int rpm;
-			rpm = args->getData(1);
+			u8 dir = 0;
+
+			dir = args->getData(1);
+			rpm = args->getData(2);
 
 			if(0 < rpm && rpm < 9000){
+
 				pxSpdCtrl->m_iTargtRpm = rpm;
+				pxSpdCtrl->m_ucCtlState = eSPD_CTL_STATE_IGNITING;
+				pxSpdCtrl->m_ucDir = dir;	
 				px6Step->ucCtlMode = eCTL_MODE_SPEED;
 			}
+			else if(rpm == 0){
+				pxSpdCtrl->m_ucCtlState = eSPD_CTL_STATE_IDLE;
+				pxSpdCtrl->m_iTargtRpm = 0;
+				px6Step->iSetDuty = 0;
+				
+			}
 
+			printf("Target RPM:%d\r\n", pxSpdCtrl->m_iTargtRpm);
+
+		}
+		else if(args->isStr(0, "ignite_pwr") == 1){
+			int ignitePwr = 0;
+			ignitePwr = args->getData(1);
+
+			if(0 < ignitePwr && ignitePwr < 1000){
+				pxSpdCtrl->m_ucIgnitePwr = ignitePwr;
+			}
+
+			printf("ignite power:%d\r\n", pxSpdCtrl->m_ucIgnitePwr);
 		}
 		else if(args->isStr(0, "duty") == 1){
 			int duty;
 
 			duty = args->getData(1);
 
+			pxSpdCtrl->m_ucCtlState = eSPD_CTL_STATE_IDLE;
+
 			if(0 <= duty && duty < 4000){
 				px6Step->iSetDuty = duty;
 				px6Step->ucCtlMode = eCTL_MODE_DUTY;
 			}
+
+			printf("Set Duty:%d\r\n", px6Step->iSetDuty);
+		}
+		else if(args->isStr(0, "log") == 1){
+			if(args->isStr(1, "on") == 1){
+				g_ucIsLogOn = 1;
+			}
+			else if(args->isStr(1, "off") == 1){
+				g_ucIsLogOn = 0;
+			}
+
+			printf("Data log:%s\r\n", (g_ucIsLogOn != 0) ? "on" : "off");
 		}
 	}
 
@@ -222,3 +295,43 @@ void CliControl(cli_args_t *args, void* param){
 
 
 
+
+
+
+void DataLoggingManage(CountingTick_t* pxTick, _6StepCtlCtx_t* px6Step, uint8_t ucStopToken){
+	if(g_ucIsLogOn != 0){
+
+		if(ucStopToken == 'z'){
+			g_ucIsLogOn = 0;
+			return;
+		}
+
+		if(pxTick->uiLog >= 50){
+			pxTick->uiLog = 0;
+
+			MotorRpmCtrl_t* pxSpdCtrl = px6Step->pxSpdCtl;
+			HallSpdMeas_t* pxHallSpdMeas = &px6Step->xHallSpdMeas;
+
+
+
+			printf("pidOut:%.1f, pidErr:%.1f, rpm_filt:%.1f, rpm_obs:%.1f, dt:%d\r\n",
+				pxSpdCtrl->fPidOut,
+				pxSpdCtrl->fPid_ErrInput,
+				pxHallSpdMeas->g_fRpm_filt,
+				pxHallSpdMeas->g_fRpm_obs,
+				pxHallSpdMeas->avg_dt_us);
+
+		}
+		
+	}
+}
+
+
+
+
+static void TmCountingHelper(void* args){
+	CountingTick_t* pxTick = (CountingTick_t*)args;
+
+	pxTick->uiLog++;
+	pxTick->uiKeeepAlive++;
+}

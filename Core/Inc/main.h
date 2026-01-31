@@ -31,12 +31,17 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdint.h>
 
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
+
+typedef struct {
+	uint32_t uiLog;
+	uint32_t uiKeeepAlive;
+}CountingTick_t;
 
 /* USER CODE END ET */
 
@@ -46,7 +51,7 @@ extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim6;
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
-
+extern CountingTick_t g_xTickCount;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

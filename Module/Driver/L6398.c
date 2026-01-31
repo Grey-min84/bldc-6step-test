@@ -9,6 +9,8 @@ IGpio_t g_xGpo_phaseU_lowside;
 IGpio_t g_xGpo_phaseV_lowside;
 IGpio_t g_xGpo_phaseW_lowside;
 
+static inline uint8_t Hall_MapPrevOfForward(uint8_t hall);
+
 void InitL6398_Unipolar(DrvPwm_Unipolar_t* pxDrive, fpPeriodCb fpCb, void* _args){
 
     PlatformConfig_6stepUniPolar(&g_xPwm_phaseU_highside, &g_xPwm_phaseV_highside, &g_xPwm_phaseW_highside,
@@ -42,10 +44,21 @@ void InitL6398_Unipolar(DrvPwm_Unipolar_t* pxDrive, fpPeriodCb fpCb, void* _args
 
 
 
-void Apply_L6398_CommutationUnipolar(DrvPwm_Unipolar_t* pvDriver, uint8_t state, u32 pwmVal) {
+void Apply_L6398_CommutationUnipolar(DrvPwm_Unipolar_t* pvDriver, uint8_t state, u32 pwmVal, u8 dir) {
 
+    u8 hallState = state;
 
-	switch (state)
+    if (dir != 0) {
+
+        // 핵심: REV일 때는 "정방향 이전 홀"로 치환해서
+        // 기존 정방향 스위치를 그대로 태운다.
+        hallState = Hall_MapPrevOfForward(state);
+    }
+    else {
+        hallState = state;
+    }
+
+	switch (hallState)
 	{
 		case 4:  // Hall: 001 -> B-PWM, C-Low
 			//DrvL6398_6Step_UniPolar_GateCtl(DrvPwm_Unipolar_t* pxDrv, u8 phase, u8 ctl, float duty)
@@ -100,6 +113,20 @@ void Apply_L6398_CommutationUnipolar(DrvPwm_Unipolar_t* pvDriver, uint8_t state,
 
 
 
+
+static inline uint8_t Hall_MapPrevOfForward(uint8_t hall)
+{
+    switch (hall)
+    {
+        case 1: return 6;
+        case 3: return 4;
+        case 2: return 5;
+        case 6: return 1;
+        case 4: return 3;
+        case 5: return 2;
+        default: return hall; // 0,7 등은 그대로
+    }
+}
 
 
 void DrvL6398_6Step_UniPolar_GateCtl(DrvPwm_Unipolar_t* pxDrv, u8 phase, u8 ctl, uint32_t duty){
@@ -170,5 +197,4 @@ void DrvL6398_6Step_UniPolar_GateCtl(DrvPwm_Unipolar_t* pxDrv, u8 phase, u8 ctl,
     
 
 }
-
 

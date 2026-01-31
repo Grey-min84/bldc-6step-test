@@ -88,7 +88,7 @@ static void MX_TIM7_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 uint16_t testPwmVal = 0;
-
+CountingTick_t g_xTickCount;
 
 
 static DrvPwm_Unipolar_t g_xDriverUniPolar;
@@ -164,10 +164,9 @@ int main(void)
 
 
 
- 
-
 
   HAL_TIM_Base_Start_IT(&htim6);
+  HAL_TIM_Base_Start_IT(&htim7);
   
   /* USER CODE END 2 */
 
@@ -198,7 +197,8 @@ int main(void)
        g_fCurrMeas[i] = g_fAdcVolt[i] - g_fCurrOffset[i];
     }
 #endif
-    cliMain();
+    uint8_t token = cliMain();
+    DataLoggingManage(&g_xTickCount, &g_xCtlUniPolar, token);
   }
   /* USER CODE END 3 */
 }

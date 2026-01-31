@@ -2,7 +2,7 @@
 #include "six_step.h"
 
 #define DEF_RPM_CTL_KP			(0.01f)
-#define DEF_RPM_CTL_KI			(0.0005f)
+#define DEF_RPM_CTL_KI			(0.0000f)
 #define DEF_RPM_CTL_KD			(0.0f)
 #define DEF_RPM_CTL_KA			(1.0f)
 #define DEF_RPM_CTL_MAX_ERR		(100)
@@ -18,12 +18,14 @@ void SpeedControl_Init(MotorRpmCtrl_t* pxSpdCtrl){
 	pxSpdCtrl->m_xPid.m_fSlewRate = DEF_RPM_CTL_SLEW_RATE;
 
     pxSpdCtrl->m_ucIgnitePwr = 400;
+	//pxSpdCtrl->m_ucEnable = 0;
+	pxSpdCtrl->ucMinPwr = 200;
 }
 
 
 void SpeedControl_loop(void* args){
 
-	float fPidOut = 0.0f;
+	int iPidOut = 0;
 	float fPid_ErrInput = 0.0f;
 
     _6StepCtlCtx_t* px6stepCtx = (_6StepCtlCtx_t*)args;
@@ -31,37 +33,78 @@ void SpeedControl_loop(void* args){
 
     MotorRpmCtrl_t* pxSpdCtrl = px6stepCtx->pxSpdCtl;
 
+	// if(pxSpdCtrl->m_ucEnable == 0){
+	// 	return;
+	// }
 
-	if(pxSpdCtrl->m_ucDir != pxSpdCtrl->m_ucDir_pre){
-		pxSpdCtrl->m_ucIgnited = 0;
-		pxSpdCtrl->m_ucDirChngFlag = 1;
-	}
+	switch(pxSpdCtrl->m_ucCtlState){
 
-	
+		case eSPD_CTL_STATE_DISABLED:
+		case eSPD_CTL_STATE_IDLE:
+			pxSpdCtrl->m_ucIgnited = 0;
+			pxSpdCtrl->m_ucDirChngFlag = 0;
+			pxSpdCtrl->m_ucDirChngDelayTm = 0;
+			break;
 
-	if(pxSpdCtrl->m_ucOutputOn != 0){
 
-		if(pxSpdCtrl->m_ucIgnited == 1){
+		case eSPD_CTL_STATE_IGNITING:
+			px6stepCtx->iSetDuty 	= pxSpdCtrl->m_ucIgnitePwr;
+			px6stepCtx->ucDir 		= pxSpdCtrl->m_ucDir;
 
+			px6stepCtx->fpCommTb_unipolar(px6stepCtx->pxDrvUnipolar, px6stepCtx->ucCurrHallSts,  px6stepCtx->iSetDuty, px6stepCtx->ucDir );
+
+			if(pxSpdCtrl->m_ucRpmMeasCnt > HALL_DT_BUF*4){
+                    
+				pxSpdCtrl->m_ucRpmMeasCnt = HALL_DT_BUF*4;
+				pxSpdCtrl->m_xPid.m_ErrorSum = 0.0f;
+				pxSpdCtrl->m_ucCtlState = eSPD_CTL_STATE_RUNNING;
+			}
+
+			pxSpdCtrl->m_ucDir_pre = pxSpdCtrl->m_ucDir;
+			break;
+
+		case eSPD_CTL_STATE_RUNNING:
+			// 정상 구동 상태
 			fPid_ErrInput = (float)(pxSpdCtrl->m_iTargtRpm - pxSpdCtrl->m_iCurrRpm);
 
-			fPidOut = CalcPidFloat_Incremental(&pxSpdCtrl->m_xPid, fPid_ErrInput);
+			iPidOut = (int)CalcPidFloat_Incremental(&pxSpdCtrl->m_xPid, fPid_ErrInput);
 
-			//RunDcMotor(g_pstBrkDcMotor, pxSpdCtrl->m_ucDir, (uint16_t)fPidOut);
-            px6stepCtx->iSetDuty = (u32)fPidOut;
-		}
-		else {
+			if(iPidOut < pxSpdCtrl->ucMinPwr){
+				iPidOut = pxSpdCtrl->ucMinPwr;
+			}
+			
+            px6stepCtx->iSetDuty = (u32)iPidOut;
 
-			// 모터 구동 후 초기에 RPM 측정이 안정화 될때까지 PWM 제어 수행
-            px6stepCtx->iSetDuty = pxSpdCtrl->m_ucIgnitePwr;
-		}
+			if(pxSpdCtrl->m_ucDir != pxSpdCtrl->m_ucDir_pre){
 
-		pxSpdCtrl->m_ucDir_pre = pxSpdCtrl->m_ucDir;
-		
+				pxSpdCtrl->m_ucCtlState = eSPD_CTL_STATE_DIR_CHANGING;
+				pxSpdCtrl->m_ucDirChngDelayTm = 0;
+			}
+
+			pxSpdCtrl->m_ucDir_pre = pxSpdCtrl->m_ucDir;
+			break;
+
+		case eSPD_CTL_STATE_DIR_CHANGING:
+			pxSpdCtrl->m_ucDirChngDelayTm++;
+
+			if(pxSpdCtrl->m_ucDirChngDelayTm >= 10){
+				pxSpdCtrl->m_ucDirChngDelayTm = 0;
+
+				pxSpdCtrl->m_ucDirChngFlag = 1;
+				pxSpdCtrl->m_xPid.m_ErrorSum = 0.0f;
+				pxSpdCtrl->m_ucCtlState = eSPD_CTL_STATE_IGNITING;
+			}
+			else {
+				px6stepCtx->fpCommTb_unipolar(px6stepCtx->pxDrvUnipolar, 0,  px6stepCtx->iSetDuty, px6stepCtx->ucDir );
+				return;
+			}
+			break;
+
+		default:
+			break;
 	}
-	else {
-		px6stepCtx->iSetDuty = 0;
-	}
+
+
 
 
 }

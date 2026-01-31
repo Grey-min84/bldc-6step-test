@@ -34,8 +34,8 @@ enum SIX_STEP_POS_IDX{
 	eSECTION_MAX = 8
 };
 
-typedef void (*ApplyUniPolarCb)(DrvPwm_Unipolar_t* pvDriver, uint8_t state, u32 pwmVal);
-typedef void (*ApplyBiPolarCb)(DrvPwm_Bipolar_t* pvDriver, uint8_t state, u32 pwmVal);
+typedef void (*ApplyUniPolarCb)(DrvPwm_Unipolar_t* pvDriver, uint8_t state, u32 pwmVal, u8 dir);
+typedef void (*ApplyBiPolarCb)(DrvPwm_Bipolar_t* pvDriver, uint8_t state, u32 pwmVal, u8 dir);
 
 typedef struct _6StepCtlCtx_tag{
 	ApplyBiPolarCb fpCommTb_bipolar;
@@ -47,6 +47,7 @@ typedef struct _6StepCtlCtx_tag{
 	u8 ucCtlMode;
 	
 	u32 iSetDuty;
+	u8 ucDir;
 	u8 ucBrkOn;
 	u8 ucCurrHallSts;
 
@@ -64,6 +65,7 @@ typedef struct _6StepCtlCtx_tag{
 	MotorRpmCtrl_t* pxSpdCtl;
 
 }_6StepCtlCtx_t;
+
 
 
 
@@ -87,7 +89,7 @@ void TmCheckHallState(void* ctx);
 void CliControl(cli_args_t *args, void* param);
 
 
-
+void DataLoggingManage(CountingTick_t* pxTick, _6StepCtlCtx_t* px6Step, uint8_t ucStopToken);
 
 
 

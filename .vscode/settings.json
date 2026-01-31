@@ -72,7 +72,8 @@
         "if_hal.h": "c",
         "six_step.h": "c",
         "boardnuclg431.h": "c",
-        "main.h": "c"
+        "main.h": "c",
+        "pid_ctrl.h": "c"
     },
     "editor.tokenColorCustomizations": {
         "textMateRules": [

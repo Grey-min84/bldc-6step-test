@@ -26,6 +26,8 @@ void SpdCalc_init(HallSpdMeas_t* pxSpdMeas){
 
     memset(pxSpdMeas, 0, sizeof(HallSpdMeas_t));
     pxSpdMeas->speed_state = SPEED_TIMEOUT;
+
+    MovAvg_HallSensor_Init();
 }
 
 
@@ -86,10 +88,6 @@ float CalcHallSensor_RawRPM(uint32_t _dt_us){
 
 
 
-
-
-
-
 void SpeedCalculation(void* args){
 
     _6StepCtlCtx_t* px6stpCtx = (_6StepCtlCtx_t*)args;
@@ -129,11 +127,11 @@ void SpeedCalculation(void* args){
 
                 pxSpdCtl->m_ucRpmMeasCnt++;
 
-                if(pxSpdCtl->m_ucRpmMeasCnt > HALL_DT_BUF*4){
+                // if(pxSpdCtl->m_ucRpmMeasCnt > HALL_DT_BUF*4){
                     
-                    pxSpdCtl->m_ucRpmMeasCnt = HALL_DT_BUF*4;
-                    pxSpdCtl->m_ucIgnited = 1;
-                }
+                //     pxSpdCtl->m_ucRpmMeasCnt = HALL_DT_BUF*4;
+                //     pxSpdCtl->m_ucIgnited = 1;
+                // }
 
 
                 if(pxHallSpdMeas->avg_dt_us != 0)
@@ -175,18 +173,18 @@ void SpeedCalculation(void* args){
         
 
 #if 1
-    if(pxSpdCtl->m_ucIgnited == 1){
-        float diff = fabs(pxSpdCtl->m_iCurrRpm - pxHallSpdMeas->g_fRpm_obs);
+    // if(pxSpdCtl->m_ucIgnited == 1){
+    //     float diff = fabs(pxSpdCtl->m_iCurrRpm - pxHallSpdMeas->g_fRpm_obs);
 
-        float chkValidRate = diff / pxSpdCtl->m_iCurrRpm;
+    //     float chkValidRate = diff / pxSpdCtl->m_iCurrRpm;
 
-        if(chkValidRate < 0.5f){
-            pxSpdCtl->m_iCurrRpm = pxHallSpdMeas->g_fRpm_obs;
-        }
-    }
-    else {
-        pxSpdCtl->m_iCurrRpm = pxHallSpdMeas->g_fRpm_obs;
-    }
+    //     if(chkValidRate < 0.5f){
+    //         pxSpdCtl->m_iCurrRpm = pxHallSpdMeas->g_fRpm_obs;
+    //     }
+    // }
+    // else {
+    //     pxSpdCtl->m_iCurrRpm = pxHallSpdMeas->g_fRpm_obs;
+    // }
     
 
     pxSpdCtl->m_iCurrRpm = pxHallSpdMeas->g_fRpm_obs;
