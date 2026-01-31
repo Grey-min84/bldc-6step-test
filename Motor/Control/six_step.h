@@ -51,8 +51,9 @@ typedef struct _6StepCtlCtx_tag{
 	u8 ucBrkOn;
 	u8 ucCurrHallSts;
 
+	u32 uiMaxPeriodCnt;
 
-	uint8_t ucIsIgnited;
+	u8 ucIsIgnited;
 
 	IGpio_t xGpe_HallU ;
 	IGpio_t xGpe_HallV ;

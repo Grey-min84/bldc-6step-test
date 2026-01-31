@@ -44,7 +44,10 @@ void portSTM32_PWM_Generate(Pwm1Ch_HwWrapper* pxPwm, u32 uiDuty){
 
 
 
-
+u32 portSTM32_Get_Period(Pwm1Ch_HwWrapper* pxPwm){
+    TIM_HandleTypeDef* pxHwTimer = pxPwm->pxPwmHw;
+    return pxHwTimer->Init.Period;
+}
 
 
 

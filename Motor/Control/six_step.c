@@ -6,11 +6,6 @@
 #include "measCurr.h"
 #include "tiny_printf.h"
 
-// IGpio_t g_xGpe_HallU ;
-// IGpio_t g_xGpe_HallV ;
-// IGpio_t g_xGpe_HallW ;
-
-
 
 
 /* ********************************
@@ -59,7 +54,7 @@ void Init_6Step_Unipolar(_6StepCtlCtx_t* ctx, DrvPwm_Unipolar_t* pvDriver){
 	ctx->ucDir = 0;
 	ctx->ucCtlMode = eCTL_MODE_DUTY;
 
-
+	ctx->uiMaxPeriodCnt = Pwm1_getPeriod(ctx->pxDrvUnipolar->pxPwmU_highSide);
 
 	g_xTmHallChecker.args = (void*)ctx;
 	g_xTmHallChecker.fpTmTask = TmCheckHallState;
@@ -84,7 +79,7 @@ void Init_6step_speedCtrl(_6StepCtlCtx_t* ctx){
 
 	ctx->pxSpdCtl = &g_xMotorRpmCtrl;
 
-	SpeedControl_Init(ctx->pxSpdCtl);
+	SpeedControl_Init(ctx->pxSpdCtl, ctx->uiMaxPeriodCnt);
 	SpdCalc_init(&ctx->xHallSpdMeas);
 
 	// Init speed measurement
@@ -257,7 +252,7 @@ void CliControl(cli_args_t *args, void* param){
 			int ignitePwr = 0;
 			ignitePwr = args->getData(1);
 
-			if(0 < ignitePwr && ignitePwr < 1000){
+			if(0 < ignitePwr && ignitePwr < px6Step->uiMaxPeriodCnt * 25 / 100){
 				pxSpdCtrl->m_ucIgnitePwr = ignitePwr;
 			}
 
@@ -270,7 +265,7 @@ void CliControl(cli_args_t *args, void* param){
 
 			pxSpdCtrl->m_ucCtlState = eSPD_CTL_STATE_IDLE;
 
-			if(0 <= duty && duty < 4000){
+			if(0 <= duty && duty < px6Step->uiMaxPeriodCnt * 75 / 100){
 				px6Step->iSetDuty = duty;
 				px6Step->ucCtlMode = eCTL_MODE_DUTY;
 			}
@@ -278,6 +273,7 @@ void CliControl(cli_args_t *args, void* param){
 			printf("Set Duty:%d\r\n", px6Step->iSetDuty);
 		}
 		else if(args->isStr(0, "log") == 1){
+
 			if(args->isStr(1, "on") == 1){
 				g_ucIsLogOn = 1;
 			}
@@ -286,6 +282,13 @@ void CliControl(cli_args_t *args, void* param){
 			}
 
 			printf("Data log:%s\r\n", (g_ucIsLogOn != 0) ? "on" : "off");
+		}
+		else {
+			printf("\r\n");
+			printf("rpm <dir> <rpm>         : set target rpm\r\n");
+			printf("duty <duty>             : set duty (0~max 75%%)\r\n");
+			printf("ignite_pwr <power>      : set ignite power (0~max25%%)\r\n");	
+			printf("log <on/off>            : data log on/off\r\n");
 		}
 	}
 

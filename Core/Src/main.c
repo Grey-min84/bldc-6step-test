@@ -159,7 +159,7 @@ int main(void)
   Init_6step_adcSampling(&g_xCtlUniPolar);
   Init_6step_speedCtrl(&g_xCtlUniPolar);
 
-	cliAdd("six_step", CliControl, (void*)&g_xCtlUniPolar,  1);
+	cliAdd("motor", CliControl, (void*)&g_xCtlUniPolar,  1);
 
 
 
@@ -672,9 +672,9 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 2-1;
+  htim3.Init.Prescaler = 4-1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 4249;
+  htim3.Init.Period = 2150-1;   //2150 - 4  , 2 - 4249
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)

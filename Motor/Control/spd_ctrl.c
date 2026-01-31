@@ -2,7 +2,7 @@
 #include "six_step.h"
 
 #define DEF_RPM_CTL_KP			(0.01f)
-#define DEF_RPM_CTL_KI			(0.0000f)
+#define DEF_RPM_CTL_KI			(0.0002f)
 #define DEF_RPM_CTL_KD			(0.0f)
 #define DEF_RPM_CTL_KA			(1.0f)
 #define DEF_RPM_CTL_MAX_ERR		(100)
@@ -10,11 +10,13 @@
 #define DEF_RPM_CTL_MIN_OUTPUT	(0)
 #define DEF_RPM_CTL_SLEW_RATE	(5)
 
-void SpeedControl_Init(MotorRpmCtrl_t* pxSpdCtrl){
+void SpeedControl_Init(MotorRpmCtrl_t* pxSpdCtrl, u32 uiMaxPeriodCnt){
+
+	u32 maxPeriod = uiMaxPeriodCnt * 75 / 100;	// 75% of max period count
 
     InitPIDCtrlVarFloat(&pxSpdCtrl->m_xPid);
 	SetPIDGainFloat(&pxSpdCtrl->m_xPid, DEF_RPM_CTL_KP, DEF_RPM_CTL_KI, DEF_RPM_CTL_KD, DEF_RPM_CTL_KA);
-	SetPIDConfigVarFloat(&pxSpdCtrl->m_xPid, DEF_RPM_CTL_MAX_ERR, DEF_RPM_CTL_MAX_OUTPUT, DEF_RPM_CTL_MIN_OUTPUT);
+	SetPIDConfigVarFloat(&pxSpdCtrl->m_xPid, DEF_RPM_CTL_MAX_ERR, maxPeriod, DEF_RPM_CTL_MIN_OUTPUT);
 	pxSpdCtrl->m_xPid.m_fSlewRate = DEF_RPM_CTL_SLEW_RATE;
 
     pxSpdCtrl->m_ucIgnitePwr = 400;

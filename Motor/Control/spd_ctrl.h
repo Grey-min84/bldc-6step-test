@@ -34,5 +34,5 @@ typedef struct {
 }MotorRpmCtrl_t;
 
 void SpeedControl_loop(void* px6stepCtx);
-void SpeedControl_Init(MotorRpmCtrl_t* pxSpdCtrl);
+void SpeedControl_Init(MotorRpmCtrl_t* pxSpdCtrl, u32 uiMaxPeriodCnt);
 #endif

@@ -23,6 +23,7 @@ typedef struct {
 void portSTM32_PwmChannelInit(Pwm1Ch_HwWrapper* pxPwm, TIM_HandleTypeDef* pxHwTimer, u32 uiHwCh, u32 uiMaxDuty);
 void portSTM32_PWM_StartStop(Pwm1Ch_HwWrapper* pxPwm,  u8 ucOnOff);
 void portSTM32_PWM_Generate(Pwm1Ch_HwWrapper* pxPwm, u32 uiDuty);
+u32 portSTM32_Get_Period(Pwm1Ch_HwWrapper* pxPwm);
 
 
 void portSTM32_PWMDual_Init(PWM2Ch_HwWrapper* pxPwm, TIM_HandleTypeDef* pxHwTimer, u32 uiHwCh, u32 uiMaxDuty);

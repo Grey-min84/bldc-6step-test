@@ -51,7 +51,9 @@ void Pwm1_HwPeriodElapsedCallback(IPwm_t* pxHw){
     }
 }
 
-
+u32 Pwm1_getPeriod(IPwm_t* pxPwm){
+    return portSTM32_Get_Period(pxPwm->pxPwmSrc);
+}
 
 
 
