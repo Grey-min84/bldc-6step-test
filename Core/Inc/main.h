@@ -40,6 +40,7 @@ extern "C" {
 
 typedef struct {
 	uint32_t uiLog;
+  uint32_t uiAlwaysLog;
 	uint32_t uiKeeepAlive;
 }CountingTick_t;
 
@@ -51,6 +52,8 @@ extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim6;
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
+extern UART_HandleTypeDef huart3;
+
 extern CountingTick_t g_xTickCount;
 /* USER CODE END EC */
 

@@ -12,15 +12,14 @@
 
 void SpeedControl_Init(MotorRpmCtrl_t* pxSpdCtrl, u32 uiMaxPeriodCnt){
 
-	u32 maxPeriod = uiMaxPeriodCnt * 75 / 100;	// 75% of max period count
+	u32 maxOutput = uiMaxPeriodCnt * 75 / 100;	// 75% of max period count
 
     InitPIDCtrlVarFloat(&pxSpdCtrl->m_xPid);
 	SetPIDGainFloat(&pxSpdCtrl->m_xPid, DEF_RPM_CTL_KP, DEF_RPM_CTL_KI, DEF_RPM_CTL_KD, DEF_RPM_CTL_KA);
-	SetPIDConfigVarFloat(&pxSpdCtrl->m_xPid, DEF_RPM_CTL_MAX_ERR, maxPeriod, DEF_RPM_CTL_MIN_OUTPUT);
+	SetPIDConfigVarFloat(&pxSpdCtrl->m_xPid, DEF_RPM_CTL_MAX_ERR, maxOutput, DEF_RPM_CTL_MIN_OUTPUT);
 	pxSpdCtrl->m_xPid.m_fSlewRate = DEF_RPM_CTL_SLEW_RATE;
 
     pxSpdCtrl->m_ucIgnitePwr = 400;
-	//pxSpdCtrl->m_ucEnable = 0;
 	pxSpdCtrl->ucMinPwr = 200;
 }
 
@@ -31,13 +30,8 @@ void SpeedControl_loop(void* args){
 	float fPid_ErrInput = 0.0f;
 
     _6StepCtlCtx_t* px6stepCtx = (_6StepCtlCtx_t*)args;
-
-
     MotorRpmCtrl_t* pxSpdCtrl = px6stepCtx->pxSpdCtl;
 
-	// if(pxSpdCtrl->m_ucEnable == 0){
-	// 	return;
-	// }
 
 	switch(pxSpdCtrl->m_ucCtlState){
 

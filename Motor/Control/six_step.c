@@ -302,6 +302,14 @@ void CliControl(cli_args_t *args, void* param){
 
 
 void DataLoggingManage(CountingTick_t* pxTick, _6StepCtlCtx_t* px6Step, uint8_t ucStopToken){
+	
+	uint8_t strBuf[64] = {0,};
+
+	MotorRpmCtrl_t* pxSpdCtrl = px6Step->pxSpdCtl;
+	HallSpdMeas_t* pxHallSpdMeas = &px6Step->xHallSpdMeas;
+
+	static u32 plot_time = 0;
+	
 	if(g_ucIsLogOn != 0){
 
 		if(ucStopToken == 'z'){
@@ -311,11 +319,6 @@ void DataLoggingManage(CountingTick_t* pxTick, _6StepCtlCtx_t* px6Step, uint8_t 
 
 		if(pxTick->uiLog >= 50){
 			pxTick->uiLog = 0;
-
-			MotorRpmCtrl_t* pxSpdCtrl = px6Step->pxSpdCtl;
-			HallSpdMeas_t* pxHallSpdMeas = &px6Step->xHallSpdMeas;
-
-
 
 			printf("pidOut:%.1f, pidErr:%.1f, rpm_filt:%.1f, rpm_obs:%.1f, dt:%d\r\n",
 				pxSpdCtrl->fPidOut,
@@ -327,6 +330,23 @@ void DataLoggingManage(CountingTick_t* pxTick, _6StepCtlCtx_t* px6Step, uint8_t 
 		}
 		
 	}
+
+	if(pxTick->uiAlwaysLog >= 20){
+		pxTick->uiAlwaysLog = 0;
+
+		plot_time = plot_time + 20;
+
+		// always log
+		sprintf((char*)strBuf, "%d\t%d\t%d\t%.1f\t%d\n", 
+					plot_time,
+					pxSpdCtrl->m_iTargtRpm,
+					pxSpdCtrl->m_iCurrRpm,
+					pxHallSpdMeas->g_fRpm_filt,
+					pxHallSpdMeas->avg_dt_us
+		);
+
+		HAL_UART_Transmit(&huart3, strBuf, strlen((char*)strBuf), HAL_MAX_DELAY);
+	}
 }
 
 
@@ -336,5 +356,6 @@ static void TmCountingHelper(void* args){
 	CountingTick_t* pxTick = (CountingTick_t*)args;
 
 	pxTick->uiLog++;
+	pxTick->uiAlwaysLog++;
 	pxTick->uiKeeepAlive++;
 }

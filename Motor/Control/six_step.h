@@ -1,6 +1,7 @@
 #ifndef __BLDC_SIX_STEP_CTL_H__
 #define __BLDC_SIX_STEP_CTL_H__
 
+#include <string.h>
 
 #include "IF_Hal.h"
 #include "motor_term_def.h"

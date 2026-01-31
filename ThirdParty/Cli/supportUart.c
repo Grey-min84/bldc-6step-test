@@ -72,7 +72,7 @@ uint8_t uartOpen(uint8_t ch, UART_HandleTypeDef* uartHw)
       break;
 
     case _DEF_UART2:
-
+      g_UartHwArr[ch] = uartHw;
       // huart1.Instance         = USART1;
       // huart1.Init.BaudRate    = baud;
       // huart1.Init.WordLength  = UART_WORDLENGTH_8B;

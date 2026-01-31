@@ -171,15 +171,10 @@ uint8_t cliOpen(uint8_t ch, UART_HandleTypeDef* uartHw)
 // {
 //   uint8_t ret;
 
-//   cli_node.log_ch = ch;
-//   cli_node.log_baud = uartHw->Init.BaudRate;
 
 //   ret = uartOpen(ch, uartHw);
 
-//   if (ret == 1)
-//   {
-//     cli_node.is_log = 1;
-//   }
+
 //   return ret;
 // }
 
