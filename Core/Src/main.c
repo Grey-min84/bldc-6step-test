@@ -28,6 +28,7 @@
 #include "cli.h"
 #include "L6398.h"
 #include "adcHnd.h"
+#include "testing.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -198,8 +199,10 @@ int main(void)
        g_fCurrMeas[i] = g_fAdcVolt[i] - g_fCurrOffset[i];
     }
 #endif
+    
+
     uint8_t token = cliMain();
-    DataLoggingManage(&g_xTickCount, &g_xCtlUniPolar, token);
+    SixStep_Main(&g_xCtlUniPolar, token);
 
     AdcMeas();
   }
@@ -319,7 +322,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_6;
+  sConfig.Channel = ADC_CHANNEL_7;
   sConfig.Rank = ADC_REGULAR_RANK_2;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -328,7 +331,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_7;
+  sConfig.Channel = ADC_CHANNEL_6;
   sConfig.Rank = ADC_REGULAR_RANK_3;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -427,36 +430,39 @@ static void MX_ADC2_Init(void)
   {
     Error_Handler();
   }
+
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_17;
+  sConfig.Rank = ADC_REGULAR_RANK_3;
+  if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
   /* USER CODE BEGIN ADC2_Init 2 */
 
 	sConfig.Channel = ADC_CHANNEL_11;
-	sConfig.Rank = ADC_REGULAR_RANK_3;
-	if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
-	{
-	Error_Handler();
-	}
-
-	sConfig.Channel = ADC_CHANNEL_13;
 	sConfig.Rank = ADC_REGULAR_RANK_4;
 	if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
 	{
 	Error_Handler();
 	}
 
-
-	sConfig.Channel = ADC_CHANNEL_11;
+	sConfig.Channel = ADC_CHANNEL_13;
 	sConfig.Rank = ADC_REGULAR_RANK_5;
 	if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
 	{
 	Error_Handler();
 	}
 
-	sConfig.Channel = ADC_CHANNEL_13;
+
+	sConfig.Channel = ADC_CHANNEL_17;
 	sConfig.Rank = ADC_REGULAR_RANK_6;
 	if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
 	{
 	Error_Handler();
 	}
+
   /* USER CODE END ADC2_Init 2 */
 
 }
@@ -579,7 +585,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 2-1;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 4249;
+  htim1.Init.Period = 4250-1;   //2150 - 4  , 2 - 4249
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -675,9 +681,9 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 4-1;
+  htim3.Init.Prescaler = 2-1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 2150-1;   //2150 - 4  , 2 - 4249
+  htim3.Init.Period = 4249;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)

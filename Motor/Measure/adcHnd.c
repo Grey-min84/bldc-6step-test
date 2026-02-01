@@ -54,5 +54,53 @@ void AdcMeas(){
 
     }
 
+}
 
+
+int32_t GetAdcValue(Adc_Idx_e eIdx){
+
+    int32_t adcVal = 0;
+
+    ADC_CH1_IDX_e eCh1Idx;
+    ADC_CH2_IDX_e eCh2Idx;
+
+   switch(eIdx){
+        case eADC_IDX_CURR_A:
+            eCh1Idx = eADC_CH_CURR_A;
+            adcVal = g_adc_buffer_ch1[eCh1Idx];
+            break;
+        case eADC_IDX_CURR_B:
+            eCh1Idx = eADC_CH_CURR_B;
+            adcVal = g_adc_buffer_ch1[eCh1Idx];
+            break;
+        case eADC_IDX_CURR_C:
+            eCh1Idx = eADC_CH_CURR_C;
+            adcVal = g_adc_buffer_ch1[eCh1Idx];
+            break;
+        case eADC_IDX_THROTTLE:
+            eCh2Idx = eADC_CH_THROTTLE;
+            adcVal = g_adc_buffer_ch2[eCh2Idx];
+            break;
+        case eADC_IDX_BEMF_A:
+            eCh1Idx = eADC_CH_BEMF_A;
+            adcVal = g_adc_buffer_ch1[eCh1Idx];
+            break;
+        case eADC_IDX_BEMF_B:
+            eCh1Idx = eADC_CH_BEMF_B;
+            adcVal = g_adc_buffer_ch1[eCh1Idx];
+            break;
+        case eADC_IDX_BEMF_C:
+            eCh2Idx = eADC_CH_BEMF_C;
+            adcVal = g_adc_buffer_ch2[eCh2Idx];
+            break;
+        case eADC_IDX_TEMP:
+            eCh1Idx = eADC_CH_TEMP;
+            adcVal = g_adc_buffer_ch1[eCh1Idx];
+            break;
+        default:
+            adcVal = 0;
+            break;
+   }
+
+   return adcVal;
 }

@@ -9,6 +9,18 @@
 #include "measSpd.h"
 #include "spd_ctrl.h"
 
+typedef enum eADC_IDX{
+    eADC_IDX_CURR_A = 0,
+    eADC_IDX_CURR_B,
+    eADC_IDX_CURR_C,
+    eADC_IDX_THROTTLE,
+    eADC_IDX_BEMF_A,
+    eADC_IDX_BEMF_B,
+    eADC_IDX_BEMF_C,
+    eADC_IDX_TEMP,
+    eADC_IDX_RESV,
+    eADC_IDX_MAX,
+}Adc_Idx_e;
 
 enum e6STEP_CTL{
 	e6STEP_CTL_UNIPOLAR = 0,
@@ -21,6 +33,20 @@ enum eCTL_MODE{
 	eCTL_MODE_SPEED,
 	eCTL_MODE_TORQUE,
 };
+
+
+
+enum cTHROTTLE_STS{
+	eTHROTTLE_DISABLE = 0,
+	eTHROTTLE_OFF ,
+	eTHROTTLE_WAIT,
+	eTHROTTLE_RDY,
+	eTHROTTLE_ON,
+	eTHROTTLE_UNDER_THR,
+};
+
+
+
 
 
 enum SIX_STEP_POS_IDX{
@@ -46,6 +72,8 @@ typedef struct _6StepCtlCtx_tag{
 	DrvPwm_Unipolar_t* pxDrvUnipolar;
 
 	u8 ucCtlMode;
+	u8 ucIsThrottleOn;
+	u8 ucThrottleSts;
 	
 	u32 iSetDuty;
 	u8 ucDir;
@@ -69,7 +97,7 @@ typedef struct _6StepCtlCtx_tag{
 }_6StepCtlCtx_t;
 
 
-
+void SixStep_Main(_6StepCtlCtx_t* px6Step, uint8_t ucStopToken);
 
 
 void OnEdge_commutation(void* args);
