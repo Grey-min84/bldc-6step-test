@@ -10,6 +10,7 @@
 /* Average Filter Variables */
 typedef struct _AVERAGE_FILTER_VAR_
 {
+	// filter val = m_Coeff * new_val + (1-m_Coeff)*pre_val
 	int32_t m_Coeff;
 	int32_t m_PreValue;
 }AVG_FILTER_VAR, *PAVG_FILTER_VAR;

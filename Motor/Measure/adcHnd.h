@@ -31,8 +31,8 @@ typedef enum eADC_CH2_IDX{
 #define ADC_BUFFER_LENGTH    6
 
 
-
+int32_t GetFilteredAdcValue(Adc_Idx_e eIdx);
 void AdcMeas();
-int32_t GetAdcValue(Adc_Idx_e eIdx);
+int32_t GetRawAdcValue(Adc_Idx_e eIdx);
 void Init_6step_adcSampling(_6StepCtlCtx_t* ctx);
 #endif

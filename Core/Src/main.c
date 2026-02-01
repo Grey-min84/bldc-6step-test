@@ -202,9 +202,9 @@ int main(void)
     
 
     uint8_t token = cliMain();
-    SixStep_Main(&g_xCtlUniPolar, token);
+    SixStep_Main(&g_xCtlUniPolar, &g_xTickCount, token);
 
-    AdcMeas();
+   
   }
   /* USER CODE END 3 */
 }

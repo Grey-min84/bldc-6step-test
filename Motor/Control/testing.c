@@ -8,7 +8,7 @@ void ThrottleControl_Test(_6StepCtlCtx_t* px6Step){
     MotorRpmCtrl_t* pxSpdCtrl = px6Step->pxSpdCtl;
 	static u8 ucPrevThrottleOn = 0;
 
-	s32 throttleVal = GetAdcValue(eADC_IDX_THROTTLE);
+	u16 throttleVal = (u16)GetFilteredAdcValue(eADC_IDX_THROTTLE);
 
 	if(px6Step->ucIsThrottleOn != ucPrevThrottleOn){
 
@@ -36,7 +36,10 @@ void ThrottleControl_Test(_6StepCtlCtx_t* px6Step){
 
 		case eTHROTTLE_ON:
 			{
-				u32 rpm = (throttleVal - THROTTLE_THRESHOLD) * (2000) / (4090 - THROTTLE_THRESHOLD);
+				throttleVal   = (throttleVal >> 2) << 2;
+
+
+				s32 rpm = (throttleVal - THROTTLE_THRESHOLD) * (2000) / (4090 - THROTTLE_THRESHOLD);
 				pxSpdCtrl->m_iTargtRpm = rpm;
 			}
 			break;
@@ -99,8 +102,8 @@ void CliControl(cli_args_t *args, void* param){
 				px6Step->ucIsThrottleOn = 0;
 			}
 			else {
-                if(GetAdcValue(eADC_IDX_THROTTLE) > THROTTLE_THRESHOLD){
-                    printf("Throttle Start value must be under 200  (val:%d)\r\n", GetAdcValue(eADC_IDX_THROTTLE));
+                if(GetRawAdcValue(eADC_IDX_THROTTLE) > THROTTLE_THRESHOLD){
+                    printf("Throttle Start value must be under 200  (val:%d)\r\n", GetRawAdcValue(eADC_IDX_THROTTLE));
                     return;
                 }
 

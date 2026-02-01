@@ -162,11 +162,12 @@ void SpeedCalculation(void* args){
 
             if(pxHallSpdMeas->g_fRpm_filt < 0.5f){
                 pxHallSpdMeas->g_fRpm_filt = 0.0f;
+                pxSpdCtl->m_iCurrRpm = 0;
             }
             break;
     }
 
-    if (dt_local > 0){
+    if (dt_local > 0 && pxHallSpdMeas->g_fRpm_filt > 0.5f){
 
         pxHallSpdMeas->g_fRpm_obs = speed_observer_step(pxHallSpdMeas);  
     }

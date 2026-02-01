@@ -1,5 +1,6 @@
 #include "adcHnd.h"
 #include "measSupport.h"
+#include "digitFilter.h"
 
 float g_fCurrOffset[eADC_CH_MAX];
 float g_fCurrMeas[3];
@@ -11,10 +12,20 @@ uint32_t adc_multimode_buffer[ADC_BUFFER_LENGTH*ADC_SAMPLE_PER_CH];
 uint16_t g_adc_buffer_ch1[ADC_BUFFER_LENGTH*ADC_SAMPLE_PER_CH];
 uint16_t g_adc_buffer_ch2[ADC_BUFFER_LENGTH*ADC_SAMPLE_PER_CH];
 
+static AVG_FILTER_VAR g_xAdcAvgFilter[eADC_IDX_MAX];
+static MedianFilter_t g_xAdcMedianFilter[eADC_IDX_MAX];
+
+static int32_t g_iAdcFilteredVal[eADC_IDX_MAX];
 
 void Init_6step_adcSampling(_6StepCtlCtx_t* ctx){
 	HAL_ADCEx_MultiModeStart_DMA(&hadc1, adc_multimode_buffer, ADC_BUFFER_LENGTH*ADC_SAMPLE_PER_CH);
 
+
+    for(int idx = 0; idx < eADC_IDX_MAX; idx++){
+
+        InitAverageFilter(&g_xAdcAvgFilter[idx], 200);
+        InitMedianFilterVar(&g_xAdcMedianFilter[idx], 7);
+    }
 }
 
 
@@ -54,10 +65,31 @@ void AdcMeas(){
 
     }
 
+    for(int idx = 0; idx < eADC_IDX_MAX; idx++){
+
+        int32_t rawAdcVal = 0;
+        int32_t filteredAdcVal = 0;
+
+       rawAdcVal = GetRawAdcValue((Adc_Idx_e)idx);
+
+        filteredAdcVal = AverageFilter(&g_xAdcAvgFilter[idx], rawAdcVal);
+        g_iAdcFilteredVal[idx] = MedianFilter(&g_xAdcMedianFilter[idx], filteredAdcVal);
+
+    }
+
+}
+
+int32_t GetFilteredAdcValue(Adc_Idx_e eIdx){
+
+    int32_t adcVal = 0;
+
+    adcVal = g_iAdcFilteredVal[eIdx];
+
+   return adcVal;
 }
 
 
-int32_t GetAdcValue(Adc_Idx_e eIdx){
+int32_t GetRawAdcValue(Adc_Idx_e eIdx){
 
     int32_t adcVal = 0;
 

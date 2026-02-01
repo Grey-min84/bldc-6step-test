@@ -25,7 +25,7 @@
 #define CLI_KEY_HOME              0x31
 #define CLI_KEY_END               0x34
 
-#define CLI_PROMPT_STR            "GR_Cli# "
+#define CLI_PROMPT_STR            "BLDC@cli$ "
 
 #define CLI_ARGS_MAX              32
 #define CLI_PRINT_BUF_MAX         256

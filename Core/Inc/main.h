@@ -42,6 +42,7 @@ typedef struct {
 	uint32_t uiLog;
   uint32_t uiAlwaysLog;
 	uint32_t uiKeeepAlive;
+  uint32_t uiAdcFilter;
 }CountingTick_t;
 
 /* USER CODE END ET */

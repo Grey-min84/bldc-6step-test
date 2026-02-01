@@ -206,11 +206,16 @@ void OnEdge_commutation(void* args)
 
 
 
-void SixStep_Main(_6StepCtlCtx_t* px6Step, uint8_t ucStopToken){
+void SixStep_Main(_6StepCtlCtx_t* px6Step, CountingTick_t* pxTick, uint8_t ucStopToken){
 
 	ThrottleControl_Test(px6Step);
 
-	DataLoggingManage(&g_xTickCount, px6Step, ucStopToken);
+	DataLoggingManage(pxTick, px6Step, ucStopToken);
+
+	if(pxTick->uiAdcFilter >= 1){
+		pxTick->uiAdcFilter = 0;
+	 	AdcMeas();
+	}
 }
 
 
@@ -223,4 +228,5 @@ static void TmCountingHelper(void* args){
 	pxTick->uiLog++;
 	pxTick->uiAlwaysLog++;
 	pxTick->uiKeeepAlive++;
+	pxTick->uiAdcFilter++;
 }

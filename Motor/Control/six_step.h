@@ -97,7 +97,7 @@ typedef struct _6StepCtlCtx_tag{
 }_6StepCtlCtx_t;
 
 
-void SixStep_Main(_6StepCtlCtx_t* px6Step, uint8_t ucStopToken);
+void SixStep_Main(_6StepCtlCtx_t* px6Step, CountingTick_t* pxTick, uint8_t ucStopToken);
 
 
 void OnEdge_commutation(void* args);
