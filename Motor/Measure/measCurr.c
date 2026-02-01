@@ -1,22 +1,20 @@
 #include "measCurr.h"
 
-float g_fCurrOffset[eADC_CH_MAX];
-float g_fCurrMeas[3];
-
-uint32_t adc_multimode_buffer[ADC_BUFFER_LENGTH*ADC_SAMPLE_PER_CH];
-uint16_t g_adc_buffer_ch1[ADC_BUFFER_LENGTH*ADC_SAMPLE_PER_CH];
-uint16_t g_adc_buffer_ch2[ADC_BUFFER_LENGTH*ADC_SAMPLE_PER_CH];
 
 
 
 
+
+
+
+#if 0
 
 
 void OffsetCurrentMeas(){
 
     HAL_Delay(100);
 
-    for(int idx=0; idx<2000; idx++) {
+    for(int idx=0; idx<200; idx++) {
 
 	for(int i = 0; i < ADC_BUFFER_LENGTH; i++) {
 
@@ -58,10 +56,6 @@ void OffsetCurrentMeas(){
 		HAL_Delay(1);
 	}
 }
-
-
-#if 0
-
 
 
 #define ZERO_CROSS_NOT_DETECTED (0)

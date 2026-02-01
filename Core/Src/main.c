@@ -27,6 +27,7 @@
 #include "six_step.h"
 #include "cli.h"
 #include "L6398.h"
+#include "adcHnd.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -199,6 +200,8 @@ int main(void)
 #endif
     uint8_t token = cliMain();
     DataLoggingManage(&g_xTickCount, &g_xCtlUniPolar, token);
+
+    AdcMeas();
   }
   /* USER CODE END 3 */
 }

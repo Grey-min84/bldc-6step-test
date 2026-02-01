@@ -14,9 +14,7 @@ PB7
 PC8
 PC10
 ******************************** */
-extern uint32_t adc_multimode_buffer[ADC_BUFFER_LENGTH*ADC_SAMPLE_PER_CH];
-extern uint16_t g_adc_buffer_ch1[ADC_BUFFER_LENGTH*ADC_SAMPLE_PER_CH];
-extern uint16_t g_adc_buffer_ch2[ADC_BUFFER_LENGTH*ADC_SAMPLE_PER_CH];
+
 
 
 
@@ -68,10 +66,7 @@ void Init_6Step_Unipolar(_6StepCtlCtx_t* ctx, DrvPwm_Unipolar_t* pvDriver){
 
 
 
-void Init_6step_adcSampling(_6StepCtlCtx_t* ctx){
-	HAL_ADCEx_MultiModeStart_DMA(&hadc1, adc_multimode_buffer, ADC_BUFFER_LENGTH*ADC_SAMPLE_PER_CH);
 
-}
 
 
 void Init_6step_speedCtrl(_6StepCtlCtx_t* ctx){
