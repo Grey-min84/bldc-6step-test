@@ -7,6 +7,7 @@ void ThrottleControl_Test(_6StepCtlCtx_t* px6Step){
 
     MotorRpmCtrl_t* pxSpdCtrl = px6Step->pxSpdCtl;
 	static u8 ucPrevThrottleOn = 0;
+	s32 rpm = 0;
 
 	u16 throttleVal = (u16)GetFilteredAdcValue(eADC_IDX_THROTTLE);
 
@@ -35,13 +36,15 @@ void ThrottleControl_Test(_6StepCtlCtx_t* px6Step){
 			break;
 
 		case eTHROTTLE_ON:
-			{
-				throttleVal   = (throttleVal >> 2) << 2;
-
-
-				s32 rpm = (throttleVal - THROTTLE_THRESHOLD) * (2000) / (4090 - THROTTLE_THRESHOLD);
+			if(throttleVal >= THROTTLE_THRESHOLD){
+				rpm = (throttleVal - THROTTLE_THRESHOLD) * (2000) / (4090 - THROTTLE_THRESHOLD);
 				pxSpdCtrl->m_iTargtRpm = rpm;
 			}
+			else {
+				px6Step->ucThrottleSts = eTHROTTLE_UNDER_THR;
+				pxSpdCtrl->m_iTargtRpm = 0;
+			}
+			
 			break;
 
 		case eTHROTTLE_UNDER_THR:
@@ -70,8 +73,6 @@ void ThrottleControl_Test(_6StepCtlCtx_t* px6Step){
 
 
 	ucPrevThrottleOn = px6Step->ucIsThrottleOn;
-
-
 }
 
 
@@ -128,10 +129,12 @@ void CliControl(cli_args_t *args, void* param){
 
 			if(0 < rpm && rpm < 9000){
 
-				pxSpdCtrl->m_iTargtRpm = rpm;
 				pxSpdCtrl->m_ucCtlState = eSPD_CTL_STATE_IGNITING;
-				pxSpdCtrl->m_ucDir = dir;	
 				px6Step->ucCtlMode = eCTL_MODE_SPEED;
+
+				pxSpdCtrl->m_ucIgnitePwr = rpm - 100;
+				pxSpdCtrl->m_ucDir = dir;	
+				pxSpdCtrl->m_iTargtRpm = rpm;
 			}
 			else if(rpm == 0){
 				pxSpdCtrl->m_ucCtlState = eSPD_CTL_STATE_IDLE;
@@ -177,13 +180,35 @@ void CliControl(cli_args_t *args, void* param){
 
 			printf("Data log:%s\r\n", (g_ucIsLogOn != 0) ? "on" : "off");
 		}
+		else if(args->isStr(0, "anti-windup") == 1){
+
+			float ka = 0.0f;
+
+			ka = args->getFloat(1);
+
+			if( 0.01f < ka && ka < 1.01f){
+				SetPIDAntiWindupGainFloat(&pxSpdCtrl->m_xPid, ka);
+				printf("Anti-windup gain set to %.2f\r\n", ka);
+			}
+			else {
+				printf("Invalid anti-windup gain value\r\n");
+			}
+			
+		}
+
+		//
 		else {
 			printf("\r\n");
+			printf("------------------------------------------------------------------\r\n");
 			printf("rpm <dir> <rpm>         : set target rpm\r\n");
 			printf("duty <duty>             : set duty (0~max 75%%)\r\n");
 			printf("ignite_pwr <power>      : set ignite power (0~max25%%)\r\n");	
 			printf("log <on/off>            : data log on/off\r\n");
 			printf("throttle <0/1>         : throttle control off/on\r\n");
+			printf("anti-windup <gain>      : set anti-windup gain (0.01~1.0)\r\n");
+			printf("------------------------------------------------------------------\r\n");
+			printf("current anti-windup gain: %.2f\r\n", pxSpdCtrl->m_xPid.m_Ka);
+			printf("------------------------------------------------------------------\r\n");
 		}
 	}
 

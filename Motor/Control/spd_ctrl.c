@@ -4,7 +4,7 @@
 #define DEF_RPM_CTL_KP			(0.01f)
 #define DEF_RPM_CTL_KI			(0.0002f)
 #define DEF_RPM_CTL_KD			(0.0f)
-#define DEF_RPM_CTL_KA			(1.0f)
+#define DEF_RPM_CTL_KA			(0.0f)
 #define DEF_RPM_CTL_MAX_ERR		(100)
 #define DEF_RPM_CTL_MAX_OUTPUT	(2599)
 #define DEF_RPM_CTL_MIN_OUTPUT	(0)
@@ -52,7 +52,7 @@ void SpeedControl_loop(void* args){
 			if(pxSpdCtrl->m_ucRpmMeasCnt > HALL_DT_BUF*4){
                     
 				pxSpdCtrl->m_ucRpmMeasCnt = HALL_DT_BUF*4;
-				pxSpdCtrl->m_xPid.m_ErrorSum = 0.0f;
+				InitPIDParam(&pxSpdCtrl->m_xPid);	
 				pxSpdCtrl->m_ucCtlState = eSPD_CTL_STATE_RUNNING;
 			}
 
@@ -87,7 +87,7 @@ void SpeedControl_loop(void* args){
 				pxSpdCtrl->m_ucDirChngDelayTm = 0;
 
 				pxSpdCtrl->m_ucDirChngFlag = 1;
-				pxSpdCtrl->m_xPid.m_ErrorSum = 0.0f;
+				InitPIDParam(&pxSpdCtrl->m_xPid);
 				pxSpdCtrl->m_ucCtlState = eSPD_CTL_STATE_IGNITING;
 			}
 			else {

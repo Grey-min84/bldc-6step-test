@@ -17,6 +17,15 @@ static MedianFilter_t g_xAdcMedianFilter[eADC_IDX_MAX];
 
 static int32_t g_iAdcFilteredVal[eADC_IDX_MAX];
 
+
+
+static u16 DismissMinorBits(u16 rawVal, u8 bitsToDismiss){
+
+    return (rawVal >> bitsToDismiss) << bitsToDismiss;
+}
+
+
+
 void Init_6step_adcSampling(_6StepCtlCtx_t* ctx){
 	HAL_ADCEx_MultiModeStart_DMA(&hadc1, adc_multimode_buffer, ADC_BUFFER_LENGTH*ADC_SAMPLE_PER_CH);
 
@@ -43,11 +52,10 @@ void AdcOffsetMeas(){
 		u32 avgVal = 0;
 
         avgVal = Calculate_AverageU32_lower(adc_multimode_buffer, jdx, ADC_SAMPLE_PER_CH,  ADC_BUFFER_LENGTH);
-        g_adc_buffer_ch1[jdx] = (uint16_t)(avgVal & 0xFFFF);        // ADC1 채널
+        g_adc_buffer_ch1[jdx] = DismissMinorBits((uint16_t)(avgVal & 0xFFFF), 2);        // ADC1 채널
 
         avgVal = Calculate_AverageU32_upper(adc_multimode_buffer, jdx, ADC_SAMPLE_PER_CH,  ADC_BUFFER_LENGTH);
-        g_adc_buffer_ch2[jdx] = (uint16_t)(avgVal & 0xFFFF);        // ADC2 채널
-
+        g_adc_buffer_ch2[jdx] = DismissMinorBits((uint16_t)(avgVal & 0xFFFF), 2);        // ADC2 채널
     }
 
 		HAL_Delay(1);
