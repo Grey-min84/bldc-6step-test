@@ -6,7 +6,7 @@
 <br><br>
 ### 1.현재 stm32g431 nucleo 보드와 x-nucleo-ihm08m1 모터 드라이버 확장 보드를 기반으로 펌웨어 작성
 #### &emsp;&emsp;1) 펌웨어 구조는 최대한 mcu나 driver 의존부분을 추상화하고 제어 부분과 분리 시도
-#### &emsp;&emsp;1) 최적화보다 코드의 재사용성이나 기능들의 직관적인 이해에 초점
+#### &emsp;&emsp;1) 최적화보다 코드의 재사용성이나 직관적인 이해에 초점을 맞춤
 #### &emsp;&emsp;2) uniPolar 방식의 6-스텝 제어
 #### &emsp;&emsp;3) Hall sensor 기반 rpm 측정 및 필터링
 #### &emsp;&emsp;4) CLI를 통해 rpm제어 
@@ -22,6 +22,7 @@
 #### &emsp;&emsp;2) ADC Oversampling 등 하드웨어 필터링 적극 사용 
 #### &emsp;&emsp;3) ISR은 ST의 HAL 레이어를 거치지 않고 바로 핸들링
 #### &emsp;&emsp;4) 추상화 레이어 하단의 HW 제어 부분을 ST HAL이 아닌 레지스터 직접 제어 방식으로 변경
+#### &emsp;&emsp;5) 추후 삼각함수 등이 필요한 상황이면 look up table 적극 활용
 <br><br>
 ### 3. 추후 진행 예정
 #### &emsp;&emsp;1) uart, adc 추상화
