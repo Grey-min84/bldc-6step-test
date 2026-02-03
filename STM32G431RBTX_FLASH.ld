@@ -148,6 +148,39 @@ SECTIONS
 
   } >RAM AT> FLASH
 
+
+
+/******/
+  /* --- RAM Functions: run from RAM, load image from FLASH --- */
+  .ramfunc :
+  {
+    . = ALIGN(4);
+    __ramfunc_start__ = .;
+    *(.ramfunc)
+    *(.ramfunc*)
+    . = ALIGN(4);
+    __ramfunc_end__ = .;
+  } >RAM AT> FLASH
+
+  __ramfunc_load__ = LOADADDR(.ramfunc);
+
+  /* --- Optional: RAM data (for LUTs you want in SRAM) --- */
+  .ramdata :
+  {
+    . = ALIGN(4);
+    __ramdata_start__ = .;
+    *(.ramdata)
+    *(.ramdata*)
+    . = ALIGN(4);
+    __ramdata_end__ = .;
+  } >RAM AT> FLASH
+
+  __ramdata_load__ = LOADADDR(.ramdata);
+
+
+
+
+
   /* Uninitialized data section into "RAM" Ram type memory */
   . = ALIGN(4);
   .bss :

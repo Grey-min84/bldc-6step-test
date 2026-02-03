@@ -33,6 +33,8 @@
 .global	g_pfnVectors
 .global	Default_Handler
 
+.extern Copy_RamSections
+
 /* start address for the initialization values of the .data section.
 defined in linker script */
 .word	_sidata
@@ -95,6 +97,8 @@ FillZerobss:
 LoopFillZerobss:
   cmp r2, r4
   bcc FillZerobss
+
+	bl  Copy_RamSections
 /* Call static constructors */
     bl __libc_init_array
 /* Call the application's entry point.*/

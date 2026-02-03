@@ -22,6 +22,7 @@
 #include "stm32g4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "six_step.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -66,6 +67,7 @@ extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim7;
 /* USER CODE BEGIN EV */
 
+extern _6StepCtlCtx_t g_xCtlUniPolar;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -284,16 +286,20 @@ void TIM3_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM3_IRQn 0 */
 
-  // uint32_t itsource = htim3.Instance->DIER;
-  // uint32_t itflag   = htim3.Instance->SR;
-  // if ((itflag & (TIM_FLAG_UPDATE)) == (TIM_FLAG_UPDATE))
-  // {
-  //   if ((itsource & (TIM_IT_UPDATE)) == (TIM_IT_UPDATE))
-  //   {
-  //     __HAL_TIM_CLEAR_FLAG(&htim3, TIM_FLAG_UPDATE);
-  //     AdcSampling(NULL);
-  //   }
-  // }
+    /* ===  Update(Period elapsed)  처리 === */
+    if ((TIM3->SR & TIM_SR_UIF) != 0U)               // Update flag set?
+    {
+        if ((TIM3->DIER & TIM_DIER_UIE) != 0U)       // Update IT enabled?
+        {
+            // UIF clear
+            TIM3->SR = (uint16_t)~TIM_SR_UIF;
+
+            g_xCtlUniPolar.fpCommTb_unipolar(g_xCtlUniPolar.pxDrvUnipolar, g_xCtlUniPolar.ucCurrHallSts,  g_xCtlUniPolar.iSetDuty, g_xCtlUniPolar.ucDir );
+            
+        }
+    }
+
+    return;
 
   // return;
   

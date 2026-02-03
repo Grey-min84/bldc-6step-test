@@ -8,6 +8,8 @@
 #include "adcHnd.h"
 #include "testing.h"
 
+#include "ramfunc.h"
+
 /* ********************************
 debug pin added 3ch
 PB7
@@ -67,6 +69,11 @@ void Init_6Step_Unipolar(_6StepCtlCtx_t* ctx, DrvPwm_Unipolar_t* pvDriver){
 	g_xTmHallChecker.ucTimerStatus = HARD_TIMER_STARTED;
 
 	RegisterTimer(&g_xTmContainerMain, &g_xTmHallChecker);
+
+
+	volatile uintptr_t addr = (uintptr_t)&Check_Valid_HallCode;
+
+	printf("Check_Valid_HallCode address: 0x%08X\r\n", addr);
 
 }
 
@@ -219,7 +226,7 @@ void OnEdge_commutation(void* args)
 	px6Step->ucCurrHallSts = state;
 	px6Step->ucIsIgnited = 1;
 
-	px6Step->fpCommTb_unipolar(px6Step->pxDrvUnipolar, state,  px6Step->iSetDuty, px6Step->ucDir );
+	//px6Step->fpCommTb_unipolar(px6Step->pxDrvUnipolar, state,  px6Step->iSetDuty, px6Step->ucDir );
 
 	MeasHallPeriod(&px6Step->xHallPeriodCalc,  read_u, read_v, read_w);
 }
@@ -243,7 +250,7 @@ void SixStep_Main(_6StepCtlCtx_t* px6Step, CountingTick_t* pxTick, uint8_t ucSto
 
 
 // dir = 0
-static const uint8_t next_cw[8] = {
+RAMDATA static  uint8_t next_cw[8] = {
     0, //000 invalid
     3, //001 ->011
     6, //010 ->110
@@ -255,7 +262,7 @@ static const uint8_t next_cw[8] = {
 };
 
 // dir = 1
-static const uint8_t next_ccw[8] = {
+RAMDATA static  uint8_t next_ccw[8] = {
     0, //000 invalid
     5, //001 ->101
     3, //010 ->011
@@ -268,10 +275,10 @@ static const uint8_t next_ccw[8] = {
 
 
 
-uint8_t Check_Valid_HallCode(uint8_t state, uint8_t dir){
+RAMFUNC uint8_t Check_Valid_HallCode(uint8_t state, uint8_t dir){
 
-	static volatile uint8_t g_hall_prev = 0;
-	static volatile uint32_t g_last_tick = 0;
+	static uint8_t g_hall_prev = 0;
+	static uint32_t g_last_tick = 0;
 
 
 	uint32_t t = TIM7->CNT;

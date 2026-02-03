@@ -93,12 +93,12 @@ uint16_t testPwmVal = 0;
 CountingTick_t g_xTickCount;
 
 
+
+_6StepCtlCtx_t g_xCtlUniPolar;
+
+
+
 static DrvPwm_Unipolar_t g_xDriverUniPolar;
-static _6StepCtlCtx_t g_xCtlUniPolar;
-
-
-
-
 
 /* USER CODE END 0 */
 
@@ -169,6 +169,12 @@ int main(void)
 
   HAL_TIM_Base_Start_IT(&htim6);
   HAL_TIM_Base_Start_IT(&htim7);
+
+  __HAL_TIM_ENABLE_IT(&htim3, TIM_IT_UPDATE);
+  __HAL_TIM_DISABLE_IT(&htim3, TIM_IT_CC1);
+  __HAL_TIM_DISABLE_IT(&htim3, TIM_IT_CC2);
+  __HAL_TIM_DISABLE_IT(&htim3, TIM_IT_CC3);
+  __HAL_TIM_DISABLE_IT(&htim3, TIM_IT_CC4);
   
   /* USER CODE END 2 */
 
