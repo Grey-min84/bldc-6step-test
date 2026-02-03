@@ -113,7 +113,7 @@ void Init_6step_speedCtrl(_6StepCtlCtx_t* ctx);
 
 
 //void HallEdgeDetected(void* args);
-uint8_t Check_Valid_HallCode(uint8_t state);
+uint8_t Check_Valid_HallCode(uint8_t state, uint8_t dir);
 void TmCheckHallState(void* ctx);
 
 void CliControl(cli_args_t *args, void* param);

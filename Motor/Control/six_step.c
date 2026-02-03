@@ -30,16 +30,6 @@ static TimerTask_t g_xTmCounting;
 static MotorRpmCtrl_t g_xMotorRpmCtrl;
 
 
-static const uint8_t next_cw[8] = {
-    0, //000 invalid
-    5, //001 ->101
-    3, //010 ->011
-    1, //011 ->001
-    6, //100 ->110
-    4, //101 ->100? (예시는 상황에 맞게 수정)
-    2, //110 ->010
-    0  //111 invalid
-};
 
 
 
@@ -184,9 +174,14 @@ void TmCheckHallState(void* args){
 
 
 
+
+uint32_t g_auiHallExceptSts[7] = {0,};
+
+
 void OnEdge_commutation(void* args)
 {
     uint8_t state = 0;
+    uint8_t IsHallStsValid = 0;
 	uint8_t read_u, read_v, read_w = 0;
 	_6StepCtlCtx_t* px6Step = (_6StepCtlCtx_t*)args;
 
@@ -212,12 +207,17 @@ void OnEdge_commutation(void* args)
 		state |= 0x04;
 	}
 
+
+
+	IsHallStsValid = Check_Valid_HallCode(state, px6Step->ucDir);
+
+	if(IsHallStsValid != 0){
+		g_auiHallExceptSts[IsHallStsValid]++;
+	}
+
+
 	px6Step->ucCurrHallSts = state;
 	px6Step->ucIsIgnited = 1;
-
-	if(Check_Valid_HallCode(state) == 0){
-		return;
-	}
 
 	px6Step->fpCommTb_unipolar(px6Step->pxDrvUnipolar, state,  px6Step->iSetDuty, px6Step->ucDir );
 
@@ -242,11 +242,33 @@ void SixStep_Main(_6StepCtlCtx_t* px6Step, CountingTick_t* pxTick, uint8_t ucSto
 
 
 
+// dir = 0
+static const uint8_t next_cw[8] = {
+    0, //000 invalid
+    3, //001 ->011
+    6, //010 ->110
+    2, //011 ->010
+    5, //100 ->101
+    1, //101 ->001? (예시는 상황에 맞게 수정)
+    4, //110 ->100
+    0  //111 invalid
+};
+
+// dir = 1
+static const uint8_t next_ccw[8] = {
+    0, //000 invalid
+    5, //001 ->101
+    3, //010 ->011
+    1, //011 ->001
+    6, //100 ->110
+    4, //101 ->100? (예시는 상황에 맞게 수정)
+    2, //110 ->010
+    0  //111 invalid
+};
 
 
 
-
-uint8_t Check_Valid_HallCode(uint8_t state){
+uint8_t Check_Valid_HallCode(uint8_t state, uint8_t dir){
 
 	static volatile uint8_t g_hall_prev = 0;
 	static volatile uint32_t g_last_tick = 0;
@@ -256,12 +278,15 @@ uint8_t Check_Valid_HallCode(uint8_t state){
     uint32_t dt = t - g_last_tick;
 
     if (dt < 5) { // 10us 이내 재발생은 노이즈로 간주 (초기값 예시)
-        return 0;
+        return 1;
     }
 
     g_last_tick = t;
 
 
+	if(state == 0 || state == 7){
+		return 5; // 000 또는 111은 불가능한 홀 상태
+	}
 	/* ****************************************************************
 	1-bit만 바뀌었는지(그레이 코드) 체크: prev XOR now의 비트 수가 1인지
 	정상적인 6스텝 BLDC 홀 전이에서는 “한 번에 오직 1비트만 바뀐다”
@@ -270,22 +295,38 @@ uint8_t Check_Valid_HallCode(uint8_t state){
 	010 (1비트 변화)
 	100 (1비트 변화)
 	**************************************************************** */
-	uint8_t diff = g_hall_prev ^ state;
+	uint8_t diff = (g_hall_prev ^ state);
     if (!(diff == 0x01 || diff == 0x02 || diff == 0x04)) {
-        return 0; // 두 비트 이상 변하면 노이즈 가능성 큼
+		
+		g_hall_prev = state;
+        return 2; // 두 비트 이상 변하면 노이즈 가능성 큼
     }
 
 
-	 // 방향별 허용 전이 체크(여기서는 CW 예시)
-    if (next_cw[g_hall_prev] != state) {
-        return 0; // 허용 전이 아니면 무시
-    }
+	if(dir == 0){
+		// 방향별 허용 전이 체크(여기서는 CCW 예시)
+		if (next_cw[g_hall_prev] != state) {
+			
+			g_hall_prev = state;
+			return 3; // 허용 전이 아니면 무시
+		}
+	}
+	else {
+		 // 방향별 허용 전이 체크(여기서는 CW 예시)
+		if (next_ccw[g_hall_prev] != state) {
+			
+			g_hall_prev = state;
+			return 4; // 허용 전이 아니면 무시
+		}
+	}
+
+	
 
 
 
 	g_hall_prev = state;
 
-	return 1;
+	return 0;
 }
 
 
